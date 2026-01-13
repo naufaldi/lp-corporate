@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@theme {
+  /* Nusantara Earth Color Palette */
+  --color-primary: #c45b28;
+  --color-secondary: #2a5c55;
+  --color-accent: #d4a24c;
+  --color-background: #f5f0e8;
+  --color-dark: #2c2416;
+
+  /* Typography */
+  --font-sans: 'Jakarta Sans', sans-serif;
+
+  /* Custom Heights */
+  --height-screen-80: 80vh;
+  --height-screen-100: 100vh;
+}
+
+/* Global Styles */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-dark);
+    font-family: var(--font-sans);
+    margin: 0;
+    padding: 0;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600;
+    line-height: 1.2;
+  }
+}
+
+/* Page Transitions */
+.page-enter-active,
+.page-leave-active {
+  transition: all 0.4s ease;
+}
+
+.page-enter-from,
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* Utility Classes */
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .h-screen-100 {
+    height: 100vh;
+  }
+
+  .h-screen-80 {
+    height: 80vh;
+  }
+}

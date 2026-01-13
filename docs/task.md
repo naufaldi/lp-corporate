@@ -7,375 +7,587 @@
 
 ---
 
-## Task Overview
+## Task Overview — Incremental Section Implementation
 
-| Phase | Tasks | Status |
-|-------|-------|--------|
-| Phase 1: Initialize | 5 tasks | ⏳ Pending |
-| Phase 2: Dependencies | 4 tasks | ⏳ Pending |
-| Phase 3: Configuration | 3 tasks | ⏳ Pending |
-| Phase 4: Structure | 6 tasks | ⏳ Pending |
-| Phase 5: Components | 8 tasks | ⏳ Pending |
-| Phase 6: Assets | 5 tasks | ⏳ Pending |
-| Phase 7: Implementation | 7 tasks | ⏳ Pending |
-| Phase 8: Verification | 4 tasks | ⏳ Pending |
-| **Total** | **42 tasks** | |
-
----
-
-## Phase 1: Initialize Nuxt 3 Project
-
-### Task 1.1: Initialize Nuxt in Current Directory
-```bash
-cd /Users/mac/WebApps/projects/lp-corporate
-npx nuxi@latest init . --force --packageManager npm --gitInit false
-```
-**Verify:** `nuxt.config.ts` and `package.json` created
-
-### Task 1.2: Verify Node.js Version
-```bash
-node --version
-```
-**Requirement:** v18.0.0 or higher (v20+ recommended)
-
-### Task 1.3: Verify Nuxt Installation
-```bash
-npx nuxi --version
-```
-**Expected:** 3.17.7 or similar
-
-### Task 1.4: Check Created Files
-List files in directory:
-```bash
-ls -la
-```
-**Expected:** `.nuxt/`, `node_modules/`, `public/`, `app.vue`, `nuxt.config.ts`, `package.json`
-
-### Task 1.5: Clean Up Default Files (Optional)
-Remove or update default `app.vue` and `README.md` if needed
+| Phase | Section | Tasks | Status |
+|-------|---------|-------|--------|
+| Phase 1-4 | Setup Complete | — | ✅ Done |
+| Phase 5 | Hero Section | 6 tasks | ⏳ Pending |
+| Phase 6 | Stats Section | 5 tasks | ⏳ Pending |
+| Phase 7 | Sustainability Section | 5 tasks | ⏳ Pending |
+| Phase 8 | Mission Section | 6 tasks | ⏳ Pending |
+| Phase 9 | Geographic Section | 5 tasks | ⏳ Pending |
+| Phase 10 | Product Section | 5 tasks | ⏳ Pending |
+| Phase 11 | Contact Section | 5 tasks | ⏳ Pending |
+| Phase 12 | Progress Indicator | 4 tasks | ⏳ Pending |
+| Phase 13 | Image Assets | 5 tasks | ⏳ Pending |
+| Phase 14 | Final Verification | 4 tasks | ⏳ Pending |
+| **Total** | **14 Phases** | **~50 tasks** | |
 
 ---
 
-## Phase 2: Install Dependencies
+## Phase 1-4: Setup Complete ✅
 
-### Task 2.1: Install GSAP
-```bash
-npm install gsap
-```
-**Verify:** `gsap` in package.json dependencies
-
-### Task 2.2: Install VueUse
-```bash
-npm install @vueuse/nuxt @vueuse/core
-```
-**Verify:** `@vueuse/nuxt` and `@vueuse/core` in package.json
-
-### Task 2.3: Install Google Fonts Module
-```bash
-npm install @nuxtjs/google-fonts
-```
-**Verify:** `@nuxtjs/google-fonts` in package.json
-
-### Task 2.4: Install Tailwind CSS v4 Vite Plugin
-```bash
-npm install -D @tailwindcss/vite
-```
-**Verify:** `@tailwindcss/vite` in package.json devDependencies
+| Task | Status | Result |
+|------|--------|--------|
+| Initialize Nuxt 3 | ✅ | v3.20.2 with Bun v1.3.4 |
+| Install Dependencies | ✅ | GSAP, VueUse, Tailwind v4, Google Fonts |
+| Configuration | ✅ | nuxt.config.ts, main.css, GSAP plugin |
+| Project Structure | ✅ | All directories + 7 section components |
+| Jakarta Sans Font | ✅ | Configured via Google Fonts CDN |
+| Tailwind v4 | ✅ | Verified with Nusantara Earth colors |
+| Test Page | ✅ | Created at `/test` |
+| .gitignore | ✅ | Created |
 
 ---
 
-## Phase 3: Configure Nuxt 3
+## Phase 5: Hero Section — Image-First Design
 
-### Task 3.1: Update nuxt.config.ts
-Replace contents with configuration for:
-- Tailwind CSS v4 via Vite plugin
-- Jakarta Sans font via Google Fonts
-- GSAP client plugin
-- SEO meta tags
-- Page transitions
-
-**File:** `nuxt.config.ts`
-
-### Task 3.2: Create Global CSS File
-Create `assets/css/main.css` with:
-- Tailwind CSS v4 import
-- Nusantara Earth color palette
-- Jakarta Sans font family
-- Base styles and transitions
-
-**File:** `assets/css/main.css`
-
-### Task 3.3: Create GSAP Plugin
-Create `plugins/gsap.client.ts` to:
-- Import gsap and ScrollTrigger
-- Register ScrollTrigger plugin
-- Provide gsap and ScrollTrigger to app
-
-**File:** `plugins/gsap.client.ts`
+**Chosen Design:** Option 2 — Image-First Hero
+**Background:** Unsplash plantation image with dark overlay
+**Layout:** Full viewport, content overlay on left side
+**Brand:** Nusantara Earth palette
 
 ---
 
-## Phase 4: Create Project Structure
+### Task 5.1: Create NPI Logo SVG ✅ DONE
+**File:** `components/ui/NpiLogo.vue`
 
-### Task 4.1: Create Assets Directories
-```bash
-mkdir -p assets/css assets/images
-```
+**Logo Features:**
+- Bold "NPI" geometric typography
+- Subtle palm leaf accent (sienna + gold)
+- Three size variants: sm (80px), md (120px), lg (200px)
+- Two color variants: light (white), dark (Dark Coffee)
+- Smooth hover animation on palm element
+- Optional full name "NUSANTARA PALM OIL" for large size
 
-### Task 4.2: Create Plugins Directory
-```bash
-mkdir -p plugins
-```
+**Usage:**
+```vue
+<!-- Light variant (white) -->
+<NpiLogo variant="light" size="md" />
 
-### Task 4.3: Create Components Directories
-```bash
-mkdir -p components/sections components/ui
-```
-
-### Task 4.4: Create Layouts Directory
-```bash
-mkdir -p layouts
-```
-
-### Task 4.5: Create Pages Directory
-```bash
-mkdir -p pages
-```
-
-### Task 4.6: Create Supporting Directories
-```bash
-mkdir -p composables public/images types
+<!-- Dark variant -->
+<NpiLogo variant="dark" size="lg" />
 ```
 
 ---
 
-## Phase 5: Create Base Components
+### Task 5.2: Create Navigation Component ✅ DONE
+**File:** `components/AppNavigation.vue`
 
-### Task 5.1: Update app.vue
-Replace with NuxtPage component
+**Features:**
+- Fixed position, sticky navigation
+- Logo on left (clickable, scrolls to hero)
+- Hamburger menu on right (mobile)
+- Desktop: Horizontal menu with 6 nav items
+- Mobile: Full-screen drawer menu
+- Scroll-based background transition:
+  - Transparent at top
+  - Dark Coffee (#2c2416) with blur after 50px scroll
+- Smooth hover effects on nav links
+- Smooth scroll to section on click
+- Aria labels for accessibility
 
-**File:** `app.vue`
+**Navigation Items:**
+- Stats → #stats
+- Sustainability → #sustainability
+- Mission → #mission
+- Geographic → #geographic
+- Product → #product
+- Contact → #contact
 
-### Task 5.2: Create layouts/default.vue
-Create default layout wrapper with basic structure
+---
 
-**File:** `layouts/default.vue`
-
-### Task 5.3: Create pages/index.vue
-Create main single-page entry point
-
-**File:** `pages/index.vue`
-
-### Task 5.4: Create HeroSection.vue
-Create placeholder Hero section component
-
+### Task 5.3: Add Hero Background ✅ DONE
 **File:** `components/sections/HeroSection.vue`
 
-### Task 5.5: Create StatsSection.vue
-Create placeholder Stats section component
-
-**File:** `components/sections/StatsSection.vue`
-
-### Task 5.6: Create SustainabilitySection.vue
-Create placeholder Sustainability section component
-
-**File:** `components/sections/SustainabilitySection.vue`
-
-### Task 5.7: Create MissionSection.vue
-Create placeholder Mission section component
-
-**File:** `components/sections/MissionSection.vue`
-
-### Task 5.8: Create Remaining Section Components
-Create placeholders for:
-- `GeographicSection.vue`
-- `ProductSection.vue`
-- `ContactSection.vue`
-
-**Files:** `components/sections/{Geographic,Product,Contact}Section.vue`
+**Features:**
+- Full viewport height (100vh), min 600px
+- Background image with object-fit: cover
+- Dark gradient overlay (linear-gradient)
+- Parallax effect on scroll (GSAP)
+- Responsive design (mobile adjustments)
 
 ---
 
-## Phase 6: Create SVG Assets
+### Task 5.4: Implement Hero Content ✅ DONE
+**File:** `components/sections/HeroSection.vue`
 
-### Task 6.1: Create Icon Component
-Create reusable Icon.vue component with Jakarta Sans integration
-
-**File:** `components/ui/Icon.vue`
-
-### Task 6.2: Create Core Value Icons
-Create SVG icons for 5 core values:
-- Sustainability (leaf/eco icon)
-- Reliable Scale (chart/growth icon)
-- Innovation Driven (lightbulb/tech icon)
-- Indonesian Pride (map/Indonesia icon)
-- Trade Excellence (globe/handshake icon)
-
-**Icons:** Inline in components or separate SVG files
-
-### Task 6.3: Create Certification Badges
-Create SVG representations for:
-- RSPO Certified badge
-- ISCC EU Certified badge
-
-**Style:** Consistent size, clean design
-
-### Task 6.4: Create Company Logo (NPI)
-Create NPI wordmark SVG for:
-- Navigation header
-- Footer
-- Favicon
-
-**Style:** Modern, industrial, using Nusantara Earth colors
-
-### Task 6.5: Create Map Markers
-Create custom map marker icons for geographic section
-
-**Style:** Consistent with brand, using accent color
+**Content (from docs/profile.md):**
+- Headline: "Sustainable Palm Oil for a Growing Asia" (split across 2 lines)
+- Tagline: Full company overview paragraph (84 words)
+- Typography: Jakarta Sans, responsive sizing (clamp())
 
 ---
 
-## Phase 7: Implement Sections
+### Task 5.5: Add CTA Button ✅ DONE
+**Style:**
+- Solid accent color (#d4a24c gold)
+- Padding: 1rem 2rem
+- Font: Jakarta Sans 600, 1.1rem
+- Border radius: 4px (industrial feel)
+- Hover: translateY(-2px), box-shadow
+- Arrow icon SVG
 
-### Task 7.1: Implement Hero Section
-- Full-width background
-- Jakarta Sans headlines
-- CTA button with hover animation
-- Navigation menu
+**Behavior:**
+- Scrolls to #stats section
+- Smooth scroll behavior
 
-**Content:** Tagline from docs/profile.md
+---
 
-### Task 7.2: Implement Stats Section
+### Task 5.6: Add Hero Animation ✅ DONE
+**GSAP Entrance Animation Sequence:**
+1. Background fade in (0.8s)
+2. Overlay fade in (0.6s, delay -0.4s)
+3. Content slide up (1s, delay -0.3s)
+
+**Animation Classes:**
+- `.hero-bg` - opacity fade
+- `.hero-overlay` - opacity fade
+- `.hero-content` - y translation + opacity
+
+**Parallax:**
+- Background moves at 30% speed on scroll
+- Scrub enabled
+
+---
+
+### Task 5.7: Add Scroll Behavior ✅ DONE
+**Navigation Transition:**
+- Transparent at top
+- Dark Coffee (#2c2416) + blur after 50px scroll
+- Smooth transition (0.3s ease)
+
+**Scroll Indicator:**
+- Animated line at bottom
+- Pulsing animation
+- Hidden on mobile
+
+---
+
+## Phase 5: Hero Section — COMPLETE ✅
+
+**Design:** Image-First Hero with Unsplash plantation image
+**Status:** All tasks completed
+
+---
+
+### Completed Deliverables
+
+| Task | Status | File |
+|------|--------|------|
+| 5.1 NPI Logo SVG | ✅ Done | `components/ui/NpiLogo.vue` |
+| 5.2 Navigation Component | ✅ Done | `components/AppNavigation.vue` |
+| 5.3 Hero Background | ✅ Done | `components/sections/HeroSection.vue` |
+| 5.4 Hero Content | ✅ Done | `components/sections/HeroSection.vue` |
+| 5.5 CTA Button | ✅ Done | `components/sections/HeroSection.vue` |
+| 5.6 Hero Animation | ✅ Done | `components/sections/HeroSection.vue` |
+| 5.7 Scroll Behavior | ✅ Done | `components/sections/HeroSection.vue` |
+| 5.8 Placeholder Image | ✅ Done | `public/images/hero-plantation.svg` |
+
+---
+
+### What Was Created
+
+**1. NPI Logo (`components/ui/NpiLogo.vue`)**
+- Geometric "NPI" typography
+- Palm leaf accent (sienna + gold)
+- 3 sizes: sm (80px), md (120px), lg (200px)
+- 2 variants: light (white), dark (Dark Coffee)
+- Hover animation on palm element
+
+**2. Navigation (`components/AppNavigation.vue`)**
+- Fixed sticky header
+- Logo on left (scrolls to hero)
+- Desktop: Horizontal menu (6 items)
+- Mobile: Hamburger + full-screen drawer
+- Background transition on scroll (transparent → Dark Coffee)
+- Smooth scroll to sections
+
+**3. Hero Section (`components/sections/HeroSection.vue`)**
+- Full viewport height (100vh)
+- Background SVG placeholder (palm plantation scene)
+- Dark gradient overlay for text readability
+- Headline: "Sustainable Palm Oil for a Growing Asia"
+- Tagline: Full company overview from profile.md
+- CTA: "Explore Our Story" with arrow icon
+- GSAP entrance animations (staggered reveal)
+- Parallax effect on scroll
+- Animated scroll indicator
+
+**4. Placeholder Image (`public/images/hero-plantation.svg`)**
+- SVG illustration of palm plantation
+- Golden hour sky, plantation rows, palm silhouettes
+- Ready to replace with Unsplash image later
+
+**5. Updated Index Page (`pages/index.vue`)**
+- Added AppNavigation component
+- Section IDs for navigation linking
+
+---
+
+### Build Status
+
+```
+✅ Build: 1.88 MB (468 kB gzip)
+✅ Nuxt 3.20.2
+✅ All components compiling
+✅ No errors
+```
+
+---
+
+### Next Steps
+
+**Phase 6: Stats Section**
+- Asymmetric 60/40 split layout
+- 4 stat cards with counter animations
+- GSAP ScrollTrigger
+
+**To test:**
+```bash
+bun run dev    # Development server
+bun run build  # Production build
+```
+
+**Preview:** http://localhost:3000
+
+---
+
+### Hero Image
+
+The placeholder SVG can be replaced with a real Unsplash image:
+
+**Unsplash Search:**
+- Keywords: "palm oil plantation aerial view Indonesia"
+- Location: `public/images/hero-plantation.svg` (replace with .jpg and update component)
+
+**Update Component:**
+```vue
+<!-- Change in HeroSection.vue -->
+<img src="/images/hero-plantation.jpg" ... />
+```
+
+## Navigation Menu Items
+
+1. Hero (current)
+2. Stats
+3. Sustainability
+4. Mission
+5. Geographic
+6. Product
+7. Contact
+
+Each links to corresponding section with smooth scroll.
+
+---
+
+## Phase 5 Checklist
+
+- [ ] 5.1 Create NPI Logo SVG
+- [ ] 5.2 Create Navigation Component
+- [ ] 5.3 Add Hero Background (Unsplash image + overlay)
+- [ ] 5.4 Implement Hero Content (headline + tagline)
+- [ ] 5.5 Add CTA Button ("Explore Our Story")
+- [ ] 5.6 Add Hero Animation (GSAP entrance)
+- [ ] 5.7 Add Scroll Behavior (parallax + nav transition)
+- [ ] 5.8 Download Hero Image (Phase 13)
+
+---
+
+**Phase 5 Complete Criteria:**
+- [ ] Logo renders correctly in navigation
+- [ ] Hero section full viewport (100vh)
+- [ ] Background image loads without artifacts
+- [ ] Text readable against background
+- [ ] CTA button prominent and clickable
+- [ ] GSAP animation plays on page load
+- [ ] Navigation transitions on scroll
+- [ ] Mobile responsive (hamburger menu works)
+
+---
+
+## Phase 6: Stats Section
+
+### Task 6.1: Layout Structure
 - Asymmetric 60/40 split
-- 4 stat cards with counter animations (GSAP)
-- Background colors (Dark Coffee panel)
-- Jakarta Sans typography
+- Left: Dark Coffee panel (stats)
+- Right: Warm Cream panel (context)
 
-**Stats:** 380,000+ MT, 85,000 ha, 2,800+ employees, $280M+
+### Task 6.2: Add 4 Stat Cards
+From `docs/profile.md`:
+- 380,000+ MT Annual Exports
+- 85,000 Hectares
+- 2,800+ Employees
+- $280M+ Revenue
 
-### Task 7.3: Implement Sustainability Section
-- Asymmetric 40/60 split
-- Certification badges (RSPO, ISCC)
-- Sustainability claims
-- Scroll reveal animation (GSAP)
+### Task 6.3: Add Stat Counter Animation
+GSAP ScrollTrigger:
+- Numbers count up when section visible
+- Duration: 2 seconds
+- Easing: power2.out
 
-### Task 7.4: Implement Mission Section
-- Diagonal split layout
-- Mission and Vision statements
-- 5 core values with icons
-- Staggered icon animation (GSAP)
+### Task 6.4: Add Context Text
+From `docs/profile.md`:
+- Brief company description paragraph
 
-### Task 7.5: Implement Geographic Section
-- Asymmetric 55/45 split
-- Location groups (HQ, Plantations, Markets)
-- Interactive map markers or styled map
-- Scroll-triggered reveal
-
-### Task 7.6: Implement Product Section
-- Asymmetric 45/55 split
-- Product specs (CPO, FFA 2.5% max)
-- Quality details
-- Product image
-
-### Task 7.7: Implement Contact Section
-- Full-width with 70/30 internal split
-- Contact information
-- CTA button
-- Footer with copyright
+### Task 6.5: Add Section Animation
+- Slide in from bottom on scroll
+- Staggered stat reveal
 
 ---
 
-## Phase 8: Add Image Assets
+## Phase 7: Sustainability Section
 
-### Task 8.1: Source Hero Image
+### Task 7.1: Layout Structure
+- Asymmetric 40/60 split
+- Left: Deep Teal (text)
+- Right: Image (sustainability)
+
+### Task 7.2: Add Certification Badges
+Create SVG badges for:
+- RSPO Certified (2019)
+- ISCC EU Certified
+
+**Style:** Consistent size, inline SVGs
+
+### Task 7.3: Add Sustainability Content
+From `docs/profile.md`:
+- Zero-deforestation commitment
+- 100% traceable supply chain
+- 40% from certified sustainable sources
+- Carbon footprint monitoring
+
+### Task 7.4: Add Sustainability Image
+Placeholder from Unsplash (to be replaced in Phase 13)
+
+### Task 7.5: Add Section Animation
+- Fade in on scroll
+- Staggered badge reveal
+
+---
+
+## Phase 8: Mission Section
+
+### Task 8.1: Layout Structure
+- Diagonal split layout
+- Left: Image (community/plantation)
+- Right: Warm Cream (text)
+
+### Task 8.2: Add Mission Statement
+From `docs/profile.md`:
+- Mission: "To secure Asia's palm oil supply..."
+
+### Task 8.3: Add Vision Statement
+From `docs/profile.md`:
+- Vision: "To be Asia's most trusted sustainable palm oil partner..."
+
+### Task 8.4: Add 5 Core Value Icons
+Create inline SVG icons:
+- Sustainability First
+- Reliable Scale
+- Innovation Driven
+- Indonesian Pride
+- Trade Excellence
+
+### Task 8.5: Add Value Descriptions
+From `docs/profile.md`:
+- Each value with icon + description
+
+### Task 8.6: Add Staggered Animation
+GSAP animation:
+- Values animate in sequence
+- 0.1s stagger between each
+
+---
+
+## Phase 9: Geographic Section
+
+### Task 9.1: Layout Structure
+- Asymmetric 55/45 split
+- Left: Deep Teal (locations)
+- Right: Warm Cream (map)
+
+### Task 9.2: Add Headquarters Info
+From `docs/profile.md`:
+- Jakarta, Indonesia (HQ)
+- Singapore (Regional Office)
+
+### Task 9.3: Add Plantation Regions
+- Central Kalimantan
+- Riau Province
+- West Kalimantan
+
+### Task 9.4: Add Export Markets
+From `docs/profile.md`:
+- Primary: China, India, Malaysia, Singapore
+- Secondary: Vietnam, Thailand, Philippines
+
+### Task 9.5: Add Map Visual
+- Styled map or placeholder
+- Map markers SVG
+
+---
+
+## Phase 10: Product Section
+
+### Task 10.1: Layout Structure
+- Asymmetric 45/55 split
+- Left: Image (CPO)
+- Right: Warm Cream (specs)
+
+### Task 10.2: Add Product Name
+From `docs/profile.md`:
+- Crude Palm Oil (CPO)
+
+### Task 10.3: Add Product Specs
+From `docs/profile.md`:
+- FFA: 2.5% max
+- Quality details
+
+### Task 10.4: Add Quality Badges
+- Laboratory tested
+- Export-grade
+
+### Task 10.5: Add Product Image
+Placeholder from Unsplash (to be replaced in Phase 13)
+
+---
+
+## Phase 11: Contact Section
+
+### Task 11.1: Layout Structure
+- Full-width
+- Dark Coffee background
+
+### Task 11.2: Add Contact Info
+- Email, phone, address
+- Jakarta HQ
+- Singapore office
+
+### Task 11.3: Add CTA Button
+- "Partner With Us"
+- Large, prominent
+
+### Task 11.4: Add Footer
+- Copyright
+- Social links
+- Certification badges
+
+### Task 11.5: Add Final Animation
+- Fade in on scroll
+
+---
+
+## Phase 12: Progress Indicator
+
+### Task 12.1: Create Progress Component
+Sticky dots on side:
+- 7 dots (one per section)
+- Active state highlighting
+
+### Task 12.2: Implement Scroll Tracking
+GSAP ScrollTrigger:
+- Update active dot on scroll
+- Smooth transitions
+
+### Task 12.3: Add Click Navigation
+- Click dot to scroll to section
+- Smooth scroll behavior
+
+### Task 12.4: Add Hide/Show Logic
+- Hide on scroll up
+- Show on scroll down
+
+---
+
+## Phase 13: Image Assets
+
+### Task 13.1: Download Hero Image
 **Keywords:** palm oil plantation, aerial view
-**Source:** Unsplash
 **Location:** `public/images/hero-plantation.jpg`
 
-### Task 8.2: Source Stats Image
+### Task 13.2: Download Stats Image
 **Keywords:** industrial, port, logistics
-**Source:** Unsplash
 **Location:** `public/images/stats-industrial.jpg`
 
-### Task 8.3: Source Sustainability Image
+### Task 13.3: Download Sustainability Image
 **Keywords:** forest, nature, sustainability
-**Source:** Unsplash
 **Location:** `public/images/sustainability-nature.jpg`
 
-### Task 8.4: Source Mission Image
+### Task 13.4: Download Mission Image
 **Keywords:** team, community, corporate
-**Source:** Unsplash
 **Location:** `public/images/mission-community.jpg`
 
-### Task 8.5: Source Product Image
+### Task 13.5: Download Product Image
 **Keywords:** oil refinery, storage tanks
-**Source:** Unsplash
 **Location:** `public/images/product-oil.jpg`
 
 ---
 
-## Phase 9: Add Interactions & Animations
+## Phase 14: Final Verification
 
-### Task 9.1: Implement Progress Indicator
-- Sticky dots on side
-- Highlights current section
-- Updates on scroll (GSAP ScrollTrigger)
+### Task 14.1: Run Development Server
+```bash
+bun run dev
+```
+**Check:** All sections render correctly
 
-### Task 9.2: Implement Section Reveals
-- Fade/slide in as sections enter viewport
-- Staggered animations for multiple elements
-- GSAP ScrollTrigger integration
+### Task 14.2: Test All Animations
+- Section reveals
+- Stat counters
+- Progress indicator
+- Hover effects
 
-### Task 9.3: Implement Stat Counter Animations
-- Numbers count up when visible
-- 380,000+, 85,000, 2,800+, $280M+
-- GSAP text animation
+### Task 14.3: Responsive Testing
+- Mobile (< 768px)
+- Tablet (768-1023px)
+- Desktop (≥ 1024px)
 
-### Task 9.4: Implement Parallax Effects
-- Subtle image movement on scroll
-- Apply to hero and section backgrounds
-- GSAP ScrollTrigger
-
-### Task 9.5: Implement Value Icons Animation
-- Staggered animation of 5 core values
-- Icons animate in sequence
-- GSAP stagger effect
-
-### Task 9.6: Implement Diagonal Clip Animation
-- Animate asymmetric section transitions
-- Diagonal clip paths
-- GSAP animation
-
-### Task 9.7: Implement Hover Effects
-- CTA buttons: scale, shadow
-- Navigation dots: size, opacity
-- Cards: border, shadow
+### Task 14.4: Production Build
+```bash
+bun run build
+```
+**Check:** Build successful, no errors
 
 ---
 
-## Phase 10: Verification & Testing
+## Quick Start Commands
 
-### Task 10.1: Run Development Server
 ```bash
-npm run dev
+# Development
+bun run dev
+
+# Build
+bun run build
+
+# Preview
+bun run preview
+
+# Type check
+bun run typecheck
+
+# Lint
+bun run lint
 ```
-**Check:** Server starts at http://localhost:3000 without errors
 
-### Task 10.2: Verify Tailwind CSS
-- Check color palette applies correctly
-- Check Jakarta Sans loads properly
-- Check responsive breakpoints work
+---
 
-### Task 10.3: Verify GSAP Animations
-- Check scroll-triggered animations work
-- Check stat counters animate correctly
-- Check hover effects respond
+## Current Progress
 
-### Task 10.4: Run TypeScript Check
-```bash
-npm run typecheck
-```
-**Check:** No TypeScript errors
+| Phase | Section | Status |
+|-------|---------|--------|
+| 1-4 | Setup Complete | ✅ |
+| 5 | Hero Section | ✅ Complete |
+| 6 | Stats Section | ⏳ Next |
+| 7 | Sustainability Section | ⏳ Pending |
+| 8 | Mission Section | ⏳ Pending |
+| 9 | Geographic Section | ⏳ Pending |
+| 10 | Product Section | ⏳ Pending |
+| 11 | Contact Section | ⏳ Pending |
+| 12 | Progress Indicator | ⏳ Pending |
+| 13 | Image Assets | ⏳ Pending |
+| 14 | Final Verification | ⏳ Pending |
 
 ---
 
@@ -391,62 +603,4 @@ npm run typecheck
 
 ---
 
-## Quick Start Commands
-
-```bash
-# Development
-npm run dev
-
-# Build
-npm run build
-
-# Preview
-npm run preview
-
-# Type check
-npm run typecheck
-
-# Lint
-npm run lint
-```
-
----
-
-## Task Tracking
-
-Use this table to mark progress:
-
-| Task | Status | Notes |
-|------|--------|-------|
-| 1.1 Initialize Nuxt | ⬜ | |
-| 1.2 Check Node.js | ⬜ | |
-| 1.3 Verify Nuxt | ⬜ | |
-| 1.4 Check Files | ⬜ | |
-| 1.5 Clean Up | ⬜ | |
-| 2.1 Install GSAP | ⬜ | |
-| 2.2 Install VueUse | ⬜ | |
-| 2.3 Install Fonts | ⬜ | |
-| 2.4 Install Tailwind | ⬜ | |
-| 3.1 Config Nuxt | ⬜ | |
-| 3.2 Create CSS | ⬜ | |
-| 3.3 Create GSAP Plugin | ⬜ | |
-| 4.1 Assets Dirs | ⬜ | |
-| 4.2 Plugins Dir | ⬜ | |
-| 4.3 Components Dirs | ⬜ | |
-| 4.4 Layouts Dir | ⬜ | |
-| 4.5 Pages Dir | ⬜ | |
-| 4.6 Support Dirs | ⬜ | |
-| 5.1 Update app.vue | ⬜ | |
-| 5.2 Create Layout | ⬜ | |
-| 5.3 Create Index | ⬜ | |
-| 5.4-5.8 Sections | ⬜ | |
-| 6.1 Icon Component | ⬜ | |
-| 6.2-6.5 SVG Assets | ⬜ | |
-| 7.1-7.7 Implement Sections | ⬜ | |
-| 8.1-8.5 Image Assets | ⬜ | |
-| 9.1-9.7 Animations | ⬜ | |
-| 10.1-10.4 Verification | ⬜ | |
-
----
-
-*Ready to execute. Start with Phase 1.*
+*Next: Phase 5 — Hero Section*
