@@ -1,6 +1,6 @@
 ---
 name: ux-law
-description: This is a new rule
+description: rule for designing user interfaces and user experience
 ---
 
 # Design Principles to Follow
