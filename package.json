@@ -1,0 +1,25 @@
+{
+  "name": "npi-landing-page",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "gsap": "^3.13.0",
+    "@vueuse/nuxt": "^11.0.0",
+    "@vueuse/core": "^11.0.0",
+    "@nuxtjs/google-fonts": "^3.2.0",
+    "nuxt": "^3.17.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.0",
+    "typescript": "^5.7.0"
+  }
+}
