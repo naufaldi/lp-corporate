@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import { useNuxtApp } from '#app'
-import asiaMap from '~/assets/images/asiaLow.svg'
+import asiaMapUrl from '~/assets/images/asiaLow.svg?url'
 
 const { $gsap } = useNuxtApp()
 
@@ -97,11 +97,12 @@ const geographicData = {
 </script>
 
 <template>
-  <section id="geographic" class="relative h-screen min-h-[800px] overflow-hidden bg-[#2c2416]">
+  <section id="geographic" class="geo-section relative h-screen min-h-[800px] overflow-hidden bg-[#2c2416]">
     <div class="absolute inset-0 z-0">
       <div class="map-container absolute inset-0">
-        <div class="map-bg absolute bg-cover bg-center bg-no-repeat" :style="{ backgroundImage: `url(${asiaMap})` }"></div>
-        <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice">
+        <div class="map-layer absolute">
+          <div class="map-bg absolute inset-0 bg-no-repeat" :style="{ backgroundImage: `url(${asiaMapUrl})` }"></div>
+          <svg class="map-overlay absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice">
           <defs>
             <linearGradient id="indonesiaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
               <stop offset="0%" style="stop-color:#2a5c55;stop-opacity:1" />
@@ -167,14 +168,15 @@ const geographicData = {
           <g class="indonesia-focus">
             <path d="M813.72,492.06l-1.18,0.05l-3.72,-1.98l2.61,-0.56l1.47,0.86l0.98,0.86L813.72,492.06zM824.15,491.78l-2.4,0.62l-0.34,-0.34l0.25,-0.96l1.21,-1.72l2.77,-1.12l0.28,0.56l0.05,0.86L824.15,491.78zM805.83,486.01l1.01,0.75l1.73,-0.23l0.7,1.2l-3.24,0.57l-1.94,0.38l-1.51,-0.02l0.96,-1.62l1.54,-0.02L805.83,486.01zM819.86,486l-0.41,1.56l-4.21,0.8l-3.73,-0.35l-0.01,-1.03l2.23,-0.59l1.76,0.84l1.87,-0.21L819.86,486zM779.82,482.31l5.37,0.28l0.62,-1.16l5.2,1.35l1.02,1.82l4.21,0.51l3.44,1.67l-3.2,1.07l-3.08,-1.13l-2.54,0.08l-2.91,-0.21l-2.62,-0.51l-3.25,-1.07l-2.06,-0.28l-1.17,0.35l-5.11,-1.16l-0.49,-1.21l-2.57,-0.21l1.92,-2.68l3.4,0.17l2.26,1.09l1.16,0.21L779.82,482.31zM853,480.73l-1.44,1.91l-0.27,-2.11l0.5,-1.01l0.59,-0.95l0.64,0.82L853,480.73zM832.04,473.02l-1.05,0.93l-1.94,-0.51l-0.55,-1.2l2.84,-0.13L832.04,473.02zM841.08,472.01l1.02,2.13l-2.37,-1.15l-2.34,-0.23l-1.58,0.18l-1.94,-0.1l0.67,-1.53l3.46,-0.12L841.08,472.01zM851.37,466.59l0.78,4.51l2.9,1.67l2.34,-2.96l3.22,-1.68l2.49,0l2.4,0.97l2.08,1l3.01,0.53l0.05,9.1l0.05,9.16l-2.5,-2.31l-2.85,-0.57l-0.69,0.8l-3.55,0.09l1.19,-2.29l1.77,-0.78l-0.73,-3.05l-1.35,-2.35l-5.44,-2.37l-2.31,-0.23l-4.21,-2.58l-0.83,1.36l-1.08,0.25l-0.64,-1.02l-0.01,-1.21l-2.14,-1.37l3.02,-1l2,0.05l-0.24,-0.74l-4.1,-0.01l-1.11,-1.66l-2.5,-0.51l-1.19,-1.38l3.78,-0.67l1.44,-0.91l4.5,1.14L851.37,466.59zM826.41,459.43l-2.25,2.76l-2.11,0.54l-2.7,-0.54l-4.67,0.14l-2.45,0.4l-0.4,2.11l2.51,2.48l1.51,-1.26l5.23,-0.95l-0.23,1.28l-1.22,-0.4l-1.22,1.63l-2.47,1.08l2.65,3.57l-0.51,0.96l2.52,3.22l-0.02,1.84l-1.5,0.82l-1.1,-0.98l1.36,-2.29l-2.75,1.08l-0.7,-0.77l0.36,-1.08l-2.02,-1.64l0.21,-2.72l-1.87,0.85l0.24,3.25l0.11,4l-1.78,0.41l-1.2,-0.82l0.8,-2.57l-0.43,-2.69l-1.18,-0.02l-0.87,-1.91l1.16,-1.83l0.4,-2.21l1.41,-4.2l0.59,-1.15l2.38,-2.07l2.19,0.82l3.54,0.39l3.22,-0.12l2.77,-2.02L826.41,459.43zM836.08,460.23l-0.15,2.43l-1.45,-0.27l-0.43,1.69l1.16,1.47l-0.79,0.33l-1.13,-1.76l-0.83,-3.56l0.56,-2.23l0.93,-1.01l0.2,1.52l1.66,0.24..." class="land indonesian-land"/>
           </g>
-        </svg>
+          </svg>
+        </div>
       </div>
       <div class="absolute inset-0 bg-gradient-to-r from-[#2c2416] via-[#2c2416]/60 to-transparent"></div>
       <div class="absolute inset-0 opacity-[0.04]" style="background-image: url(&quot;data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E&quot;);"></div>
     </div>
 
-    <div class="map-markers absolute inset-0 z-10 pointer-events-none">
-      <div class="marker jakart-marker">
+    <div class="map-markers absolute inset-0 z-30">
+      <div class="marker jakarta-marker">
         <div class="marker-dot hq-marker"></div>
         <div class="marker-ring hq-ring"></div>
         <div class="marker-pulse"></div>
@@ -289,27 +291,51 @@ const geographicData = {
 </template>
 
 <style scoped>
+.geo-section {
+  --sea-origin-x: 80%;
+  --sea-origin-y: 86%;
+  --sea-scale: 2.8;
+  --sea-inv: 0.3571429;
+  --sea-tx: -24%;
+  --sea-ty: -30%;
+}
+
 .map-container {
   overflow: hidden;
+  isolation: isolate;
 }
 
 .map-bg {
-  width: 150%;
-  height: 150%;
-  left: -25%;
-  top: -25%;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(0.12) contrast(1.12) brightness(1.08);
+  opacity: 0.9;
+}
+
+.map-layer {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform-origin: var(--sea-origin-x) var(--sea-origin-y);
+  transform: translate(var(--sea-tx), var(--sea-ty)) scale(var(--sea-scale));
+  will-change: transform;
+}
+
+.map-overlay {
+  opacity: 0.8;
+  mix-blend-mode: screen;
 }
 
 .land {
-  fill: #4a4a4a;
-  fill-opacity: 0.4;
-  stroke: rgba(255, 255, 255, 0.15);
-  stroke-width: 0.5;
+  fill: transparent;
+  fill-opacity: 0;
+  stroke: rgba(245, 240, 232, 0.22);
+  stroke-width: 0.9;
   transition: all 0.5s ease;
 }
 
 .land-dim {
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .indonesia-focus {
@@ -317,31 +343,36 @@ const geographicData = {
 }
 
 .indonesian-land {
-  fill: url(#indonesiaGradient);
-  fill-opacity: 1;
-  stroke: rgba(255, 255, 255, 0.3);
-  stroke-width: 0.5;
+  fill: rgba(42, 92, 85, 0.35);
+  stroke: rgba(212, 162, 76, 0.35);
+  stroke-width: 0.9;
+  filter: url(#strongGlow);
 }
 
 .map-markers {
   position: absolute;
   inset: 0;
+  transform-origin: var(--sea-origin-x) var(--sea-origin-y);
+  transform: translate(var(--sea-tx), var(--sea-ty)) scale(var(--sea-scale));
+  will-change: transform;
 }
 
 .marker {
   position: absolute;
   pointer-events: auto;
   cursor: pointer;
+  transform: translate(-50%, -50%) scale(var(--sea-inv));
+  transform-origin: 0 0;
 }
 
-.jakart-marker {
-  left: 68%;
-  top: 72%;
+.jakarta-marker {
+  left: 46.5778%;
+  top: 97.4129%;
 }
 
 .singapore-marker {
-  left: 70%;
-  top: 65%;
+  left: 44.6366%;
+  top: 92.6074%;
 }
 
 .marker-dot {
@@ -350,6 +381,7 @@ const geographicData = {
   border-radius: 50%;
   position: relative;
   z-index: 5;
+  border: 2px solid rgba(245, 240, 232, 0.9);
 }
 
 .hq-marker {
@@ -537,11 +569,11 @@ const geographicData = {
 }
 
 @media (max-width: 1024px) {
-  .map-bg {
-    width: 160%;
-    height: 160%;
-    left: -30%;
-    top: -30%;
+  .geo-section {
+    --sea-scale: 3;
+    --sea-inv: 0.3333333;
+    --sea-tx: -26%;
+    --sea-ty: -34%;
   }
 
   .marker-label {
@@ -556,12 +588,11 @@ const geographicData = {
 }
 
 @media (max-width: 768px) {
-  .map-bg {
-    width: 180%;
-    height: 180%;
-    left: -40%;
-    top: -40%;
-    opacity: 0.7;
+  .geo-section {
+    --sea-scale: 3.35;
+    --sea-inv: 0.2985075;
+    --sea-tx: -30%;
+    --sea-ty: -40%;
   }
 
   .marker-label {

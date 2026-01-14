@@ -2,6 +2,13 @@
 import { onMounted } from 'vue'
 import { useNuxtApp } from '#app'
 
+interface Specification {
+  parameter: string
+  value: string
+  unit: string
+  icon: string
+}
+
 interface ProductFeature {
   id: string
   title: string
@@ -9,245 +16,300 @@ interface ProductFeature {
   icon: string
 }
 
-interface Specification {
-  parameter: string
-  value: string
-  unit: string
-}
+const { $gsap } = useNuxtApp()
 
-const { $gsap, $ScrollTrigger } = useNuxtApp()
+const specifications: Specification[] = [
+  { parameter: 'Free Fatty Acids (FFA)', value: '2.5', unit: '% max', icon: 'ffa-test' },
+  { parameter: 'Moisture & Impurities', value: '0.5', unit: '% max', icon: 'moisture' },
+  { parameter: 'Iodine Value', value: '50-55', unit: 'Wijs', icon: 'iodine' },
+  { parameter: 'Melting Point', value: '33-39', unit: '°C', icon: 'melting-point' },
+  { parameter: 'Peroxide Value', value: '2', unit: 'meq/kg max', icon: 'peroxide' },
+  { parameter: 'Cloud Point', value: '10-15', unit: '°C', icon: 'cloud-point' }
+]
 
 const features: ProductFeature[] = [
   {
     id: 'quality',
     title: 'Premium Quality',
-    description: 'Consistently high-grade Crude Palm Oil meeting international standards',
-    icon: 'quality'
+    description: 'Consistently high-grade Crude Palm Oil meeting international standards with rigorous quality control',
+    icon: 'quality-badge'
   },
   {
     id: 'traceability',
     title: 'Full Traceability',
-    description: '100% traceable supply chain from plantation to port',
+    description: '100% traceable supply chain from plantation to port, ensuring complete transparency',
     icon: 'traceability'
   },
   {
     id: 'capacity',
     title: 'Scale & Reliability',
-    description: '450,000 MT annual production capacity with consistent supply',
-    icon: 'capacity'
+    description: '450,000 MT annual production capacity with consistent year-round supply to Asian markets',
+    icon: 'scale-capacity'
   },
   {
     id: 'certification',
     title: 'Internationally Certified',
-    description: 'RSPO and ISCC EU certified sustainable production',
-    icon: 'certification'
+    description: 'RSPO and ISCC EU certified sustainable production meeting global standards',
+    icon: 'certification-badge'
   }
 ]
 
-const specifications: Specification[] = [
-  { parameter: 'Free Fatty Acids (FFA)', value: '2.5', unit: '% max' },
-  { parameter: 'Moisture & Impurities', value: '0.5', unit: '% max' },
-  { parameter: 'Iodine Value', value: '50-55', unit: 'Wijs' },
-  { parameter: 'Melting Point', value: '33-39', unit: '°C' },
-  { parameter: 'Peroxide Value', value: '2', unit: 'meq/kg max' },
-  { parameter: 'Cloud Point', value: '10-15', unit: '°C' }
-]
-
-const onImageError = (e: Event) => {
-  const img = e.target as HTMLImageElement
-  img.style.display = 'none'
+const getIconPath = (iconName: string): string => {
+  const icons: Record<string, string> = {
+    'ffa-test': '/icons/product/ffa-test.svg',
+    'moisture': '/icons/product/moisture.svg',
+    'iodine': '/icons/product/iodine.svg',
+    'melting-point': '/icons/product/melting-point.svg',
+    'peroxide': '/icons/product/peroxide.svg',
+    'cloud-point': '/icons/product/cloud-point.svg',
+    'quality-badge': '/icons/product/quality-badge.svg',
+    'traceability': '/icons/product/traceability.svg',
+    'scale-capacity': '/icons/product/scale-capacity.svg',
+    'certification-badge': '/icons/product/certification-badge.svg'
+  }
+  return icons[iconName] || ''
 }
 
 onMounted(() => {
+  if (!import.meta.client) return
+
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
-    $gsap.set(['.product-intro', '.product-specs', '.product-features'], { opacity: 1 })
+    $gsap.set(['.product-left', '.product-right'], { opacity: 1 })
     return
   }
 
-  $gsap.fromTo('.product-intro',
-    { opacity: 0, y: 40 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: '#product',
-        start: 'top 60%'
-      }
-    }
-  )
+  $gsap.set('.product-left', { opacity: 0, x: -60 })
+  $gsap.set('.section-label', { opacity: 0, y: 20 })
+  $gsap.set('.product-title', { opacity: 0, y: 30 })
+  $gsap.set('.product-description', { opacity: 0, y: 20 })
+  $gsap.set('.capacity-badge', { opacity: 0, scale: 0.8 })
+  $gsap.set('.cert-row', { opacity: 0, y: 20 })
+  $gsap.set('.spec-card', { opacity: 0, y: 40, scale: 0.95 })
+  $gsap.set('.feature-card', { opacity: 0, y: 30, scale: 0.98 })
 
-  $gsap.fromTo('.product-specs',
-    { opacity: 0, y: 50 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.8,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.specs-container',
-        start: 'top 70%'
-      }
+  const tl = $gsap.timeline({
+    scrollTrigger: {
+      trigger: '#product',
+      start: 'top 55%',
+      end: 'bottom 80%',
+      toggleActions: 'play none none reverse'
     }
-  )
+  })
 
-  $gsap.fromTo('.feature-card',
-    { opacity: 0, y: 30 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.features-grid',
-        start: 'top 75%'
-      }
-    }
-  )
+  tl.to('.product-left', {
+    opacity: 1,
+    x: 0,
+    duration: 1,
+    ease: 'power3.out'
+  })
+  .to('.section-label', {
+    opacity: 1,
+    y: 0,
+    duration: 0.6,
+    ease: 'power2.out'
+  }, '-=0.6')
+  .to('.product-title', {
+    opacity: 1,
+    y: 0,
+    duration: 0.7,
+    ease: 'power2.out'
+  }, '-=0.4')
+  .to('.product-description', {
+    opacity: 1,
+    y: 0,
+    duration: 0.6,
+    ease: 'power2.out'
+  }, '-=0.4')
+  .to('.capacity-badge', {
+    opacity: 1,
+    scale: 1,
+    duration: 0.8,
+    ease: 'elastic.out(1, 0.6)'
+  }, '-=0.2')
+  .to('.cert-row', {
+    opacity: 1,
+    y: 0,
+    duration: 0.5,
+    stagger: 0.1,
+    ease: 'power2.out'
+  }, '-=0.3')
+  .to('.product-right', {
+    opacity: 1,
+    duration: 0.8,
+    ease: 'power2.out'
+  }, '-=0.8')
+  .to('.spec-card', {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    duration: 0.5,
+    stagger: 0.08,
+    ease: 'back.out(1.2)'
+  }, '-=0.4')
+  .to('.feature-card', {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    duration: 0.5,
+    stagger: 0.1,
+    ease: 'power2.out'
+  }, '-=0.3')
 
-  $gsap.fromTo('.spec-item',
-    { opacity: 0, scale: 0.9 },
-    {
-      opacity: 1,
-      scale: 1,
-      duration: 0.4,
-      stagger: 0.05,
-      ease: 'back.out(1.7)',
+  $gsap.to('.capacity-badge', {
+    scrollTrigger: {
+      trigger: '.capacity-badge',
+      start: 'top 85%',
+      end: 'bottom 15%',
+      scrub: 1
+    },
+    y: -8,
+    scale: 1.02,
+    ease: 'none'
+  })
+
+  const featureCards = document.querySelectorAll('.feature-card')
+  featureCards.forEach((card) => {
+    $gsap.to(card, {
       scrollTrigger: {
-        trigger: '.specs-grid',
-        start: 'top 80%'
-      }
-    }
-  )
+        trigger: card,
+        start: 'top 75%',
+        end: 'bottom 25%',
+        scrub: 0.5
+      },
+      y: -5,
+      scale: 1.01,
+      ease: 'none'
+    })
+  })
 })
 </script>
 
 <template>
-  <section id="product" class="product-section h-screen min-h-[800px] flex flex-col lg:flex-row overflow-hidden">
-    <div class="product-intro w-full lg:w-5/12 bg-[#2c2416] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0 relative">
-      <div class="product-background">
-        <div class="bg-gradient-radial"></div>
-        <div class="bg-accent-glow"></div>
+  <section id="product" class="product-section">
+    <div class="product-container">
+      <div class="product-left">
+        <div class="left-background">
+          <div class="bg-noise"></div>
+          <div class="bg-gradient-radial"></div>
+          <div class="bg-accent-glow"></div>
+          <div class="diagonal-overlay"></div>
+        </div>
+
+        <div class="left-content">
+          <div class="product-visual">
+            <svg viewBox="0 0 64 64" class="tank-icon" fill="none">
+              <rect x="12" y="20" width="40" height="38" rx="2" stroke="currentColor" stroke-width="2.5"/>
+              <ellipse cx="32" cy="20" rx="20" ry="6" stroke="currentColor" stroke-width="2.5"/>
+              <rect x="28" y="26" width="8" height="24" rx="1" stroke="currentColor" stroke-width="1.5"/>
+              <rect x="30" y="32" width="4" height="16" fill="currentColor" opacity="0.3"/>
+              <path d="M12 12H4V16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <path d="M52 52H60V48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="48" cy="14" r="5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M48 14L50 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M4 58H60" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <div class="capacity-badge">
+            <div class="capacity-icon">
+              <svg viewBox="0 0 64 64" fill="none">
+                <rect x="8" y="36" width="10" height="20" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="22" y="28" width="10" height="28" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="36" y="16" width="10" height="40" rx="1" stroke="currentColor" stroke-width="2"/>
+                <rect x="50" y="8" width="10" height="48" rx="1" stroke="currentColor" stroke-width="2"/>
+                <path d="M4 56L20 44L36 32L52 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M48 16L52 16L52 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="capacity-value">
+              <span class="value-number">450K</span>
+              <span class="value-unit">MT</span>
+            </div>
+            <div class="capacity-label">Annual Production Capacity</div>
+          </div>
+
+          <div class="cert-row">
+            <a href="#" class="cert-badge" aria-label="RSPO Certified">
+              <svg viewBox="0 0 64 64" fill="none">
+                <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2.5"/>
+                <path d="M32 12C32 12 24 20 20 28C20 28 24 24 32 24C40 24 44 28 44 28C40 20 32 12 32 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M32 24C32 24 26 30 26 36C26 36 32 36 32 36C32 36 38 36 38 36C38 30 32 24 32 24Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M20 46H44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <path d="M22 50H42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+              </svg>
+              <span class="cert-text">
+                <span class="cert-name">RSPO</span>
+                <span class="cert-status">Certified</span>
+              </span>
+            </a>
+            <a href="#" class="cert-badge" aria-label="ISCC EU Certified">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path d="M32 8L8 16V32C8 46 20 56 32 58C44 56 56 46 56 32V16L32 8Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+                <path d="M32 20C32 20 22 28 22 36C22 42 28 46 32 46C36 46 42 42 42 36C42 28 32 20 32 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <ellipse cx="32" cy="36" rx="12" ry="8" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+              <span class="cert-text">
+                <span class="cert-name">ISCC EU</span>
+                <span class="cert-status">Certified</span>
+              </span>
+            </a>
+          </div>
+        </div>
       </div>
 
-      <div class="intro-content relative z-10">
-        <span class="section-label text-sm uppercase tracking-[0.3em] text-[#d4a24c] mb-6 block">
-          Our Product
-        </span>
+      <div class="product-right">
+        <div class="right-content">
+          <span class="section-label">Premium Crude Palm Oil</span>
 
-        <h2 class="product-title text-4xl lg:text-6xl font-bold text-[#f5f0e8] leading-tight mb-8">
-          Crude Palm Oil
-          <span class="text-[#c45b28]">Excellence</span>
-        </h2>
+          <h2 class="product-title">
+            CPO Grade
+            <span class="title-accent">Excellence</span>
+          </h2>
 
-        <p class="product-description text-lg lg:text-xl text-[#f5f0e8]/70 leading-relaxed mb-10">
-          NPI produces premium Crude Palm Oil (CPO) at our integrated plantation-to-port operations in Kalimantan. Our 450,000 MT annual capacity ensures reliable supply to Asian markets year-round.
-        </p>
+          <p class="product-description">
+            NPI produces premium Crude Palm Oil at our integrated plantation-to-port operations in Kalimantan. 
+            Our 450,000 MT annual capacity ensures reliable, sustainable supply to Asian markets year-round.
+          </p>
 
-        <div class="certification-badges flex flex-wrap items-center gap-6">
-          <div class="cert-badge">
-            <div class="cert-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <div class="cert-text">
-              <span class="cert-label">RSPO Certified</span>
-              <span class="cert-year">Since 2019</span>
+          <div class="specs-section">
+            <h3 class="specs-title">Technical Specifications</h3>
+            <div class="specs-grid">
+              <div
+                v-for="spec in specifications"
+                :key="spec.parameter"
+                class="spec-card"
+              >
+                <div class="spec-icon">
+                  <img :src="getIconPath(spec.icon)" :alt="spec.parameter" />
+                </div>
+                <div class="spec-content">
+                  <span class="spec-parameter">{{ spec.parameter }}</span>
+                  <div class="spec-value-row">
+                    <span class="spec-value">{{ spec.value }}</span>
+                    <span class="spec-unit">{{ spec.unit }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="cert-badge">
-            <div class="cert-icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <path d="M12 6v6l4 2"/>
-              </svg>
+          <div class="features-section">
+            <h3 class="features-title">Key Product Features</h3>
+            <div class="features-grid">
+              <div
+                v-for="feature in features"
+                :key="feature.id"
+                class="feature-card"
+              >
+                <div class="feature-icon">
+                  <img :src="getIconPath(feature.icon)" :alt="feature.title" />
+                </div>
+                <h4 class="feature-title">{{ feature.title }}</h4>
+                <p class="feature-description">{{ feature.description }}</p>
+              </div>
             </div>
-            <div class="cert-text">
-              <span class="cert-label">ISCC EU</span>
-              <span class="cert-year">Certified</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="supply-indicator mt-12 pt-8 border-t border-[#f5f0e8]/10">
-          <div class="supply-stat flex items-center gap-4">
-            <div class="supply-value">
-              <span class="value-number text-4xl font-bold text-[#c45b28]">450K</span>
-              <span class="value-unit text-lg text-[#d4a24c]">MT</span>
-            </div>
-            <div class="supply-details">
-              <span class="supply-label text-sm text-[#f5f0e8]/50 uppercase tracking-wider">Annual Capacity</span>
-              <span class="supply-desc text-base text-[#f5f0e8]/80">Consistent year-round production</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="product-specs w-full lg:w-7/12 bg-[#f5f0e8] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0 relative">
-      <div class="specs-container">
-        <div class="specs-header mb-10">
-          <span class="specs-label text-sm uppercase tracking-[0.2em] text-[#2c2416]/40 mb-4 block">
-            Technical Specifications
-          </span>
-          <h3 class="specs-title text-2xl lg:text-3xl font-bold text-[#2c2416]">
-            CPO Grade Quality
-          </h3>
-        </div>
-
-        <div class="specs-grid grid grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-12">
-          <div
-            v-for="spec in specifications"
-            :key="spec.parameter"
-            class="spec-item bg-white rounded-xl p-5 shadow-sm border border-[#2c2416]/5 hover:border-[#c45b28]/20 transition-all duration-300"
-          >
-            <div class="spec-parameter text-xs text-[#2c2416]/50 uppercase tracking-wider mb-2">
-              {{ spec.parameter }}
-            </div>
-            <div class="spec-value flex items-baseline gap-1">
-              <span class="value text-2xl lg:text-3xl font-bold text-[#2c2416]">{{ spec.value }}</span>
-              <span class="unit text-sm text-[#c45b28]">{{ spec.unit }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="features-grid grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div
-            v-for="feature in features"
-            :key="feature.id"
-            class="feature-card bg-[#2c2416] rounded-xl p-6 hover:bg-[#2c2416]/90 transition-all duration-300 group"
-          >
-            <div class="feature-icon w-12 h-12 rounded-lg bg-[#c45b28]/20 flex items-center justify-center mb-4 group-hover:bg-[#c45b28] transition-colors duration-300">
-              <svg v-if="feature.icon === 'quality'" class="w-6 h-6 text-[#d4a24c] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                <polyline points="22 4 12 14.01 9 11.01"/>
-              </svg>
-              <svg v-else-if="feature.icon === 'traceability'" class="w-6 h-6 text-[#d4a24c] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="2" y1="12" x2="22" y2="12"/>
-                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-              </svg>
-              <svg v-else-if="feature.icon === 'capacity'" class="w-6 h-6 text-[#d4a24c] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <rect x="3" y="3" width="18" height="18" rx="2"/>
-                <path d="M3 9h18"/>
-                <path d="M9 21V9"/>
-              </svg>
-              <svg v-else class="w-6 h-6 text-[#d4a24c] group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <h4 class="feature-title text-lg font-semibold text-[#f5f0e8] mb-2">
-              {{ feature.title }}
-            </h4>
-            <p class="feature-desc text-sm text-[#f5f0e8]/60 leading-relaxed">
-              {{ feature.description }}
-            </p>
           </div>
         </div>
       </div>
@@ -257,53 +319,146 @@ onMounted(() => {
 
 <style scoped>
 .product-section {
+  width: 100%;
   min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 }
 
-.product-background {
+.product-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.product-left {
+  width: 45%;
+  height: 100%;
+  position: relative;
+  background: #245246;
+  clip-path: polygon(0 0, calc(100% - 80px) 0, 100% 100%, 0 100%);
+}
+
+.left-background {
   position: absolute;
   inset: 0;
   overflow: hidden;
+}
+
+.bg-noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.025;
   pointer-events: none;
 }
 
 .bg-gradient-radial {
   position: absolute;
-  top: -50%;
+  top: -30%;
   right: -20%;
-  width: 80%;
-  height: 80%;
-  background: radial-gradient(circle, rgba(196, 91, 40, 0.1) 0%, transparent 60%);
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(196, 91, 40, 0.12) 0%, transparent 50%);
 }
 
 .bg-accent-glow {
   position: absolute;
-  bottom: -30%;
+  bottom: -20%;
   left: -10%;
-  width: 60%;
-  height: 60%;
-  background: radial-gradient(circle, rgba(212, 162, 76, 0.08) 0%, transparent 50%);
+  width: 80%;
+  height: 80%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(230, 184, 77, 0.1) 0%, transparent 50%);
 }
 
-.section-label {
-  font-size: 0.875rem;
-  letter-spacing: 0.3em;
+.diagonal-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(196, 91, 40, 0.05) 0%,
+    transparent 50%,
+    rgba(36, 82, 70, 0.05) 100%
+  );
 }
 
-.product-title {
-  font-size: clamp(2.5rem, 5vw, 3.5rem);
-  line-height: 1.1;
-}
-
-.product-description {
-  font-size: 1.125rem;
-  line-height: 1.7;
-}
-
-.certification-badges {
+.left-content {
+  position: relative;
+  z-index: 10;
+  height: 100%;
   display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem 2rem 2rem 3rem;
+}
+
+.product-visual {
+  margin-bottom: 1.5rem;
+}
+
+.tank-icon {
+  width: 80px;
+  height: 80px;
+  color: #e6b84d;
+  opacity: 0.6;
+}
+
+.capacity-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.375rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  background: rgba(245, 240, 232, 0.05);
+  border: 1px solid rgba(230, 184, 77, 0.2);
+  border-left: 3px solid #e6b84d;
+}
+
+.capacity-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.375rem;
+}
+
+.capacity-icon svg {
+  width: 100%;
+  height: 100%;
+  color: #e6b84d;
+}
+
+.capacity-value {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.value-number {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #f5f0e8;
+  line-height: 1;
+  font-family: 'Jakarta Sans', sans-serif;
+}
+
+.value-unit {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #e6b84d;
+}
+
+.capacity-label {
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: rgba(245, 240, 232, 0.6);
+}
+
+.cert-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .cert-badge {
@@ -311,25 +466,24 @@ onMounted(() => {
   align-items: center;
   gap: 0.75rem;
   padding: 0.75rem 1rem;
-  background: rgba(245, 240, 232, 0.05);
-  border-radius: 8px;
+  background: rgba(245, 240, 232, 0.03);
   border: 1px solid rgba(245, 240, 232, 0.1);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.3s ease;
 }
 
-.cert-icon {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(212, 162, 76, 0.15);
-  border-radius: 8px;
-  color: #d4a24c;
+.cert-badge:hover {
+  background: rgba(245, 240, 232, 0.08);
+  border-color: rgba(230, 184, 77, 0.3);
+  transform: translateX(4px);
 }
 
-.cert-icon svg {
-  width: 18px;
-  height: 18px;
+.cert-badge svg {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  color: #e6b84d;
 }
 
 .cert-text {
@@ -337,138 +491,230 @@ onMounted(() => {
   flex-direction: column;
 }
 
-.cert-label {
+.cert-name {
   font-size: 0.875rem;
   font-weight: 600;
   color: #f5f0e8;
 }
 
-.cert-year {
-  font-size: 0.75rem;
+.cert-status {
+  font-size: 0.65rem;
   color: rgba(245, 240, 232, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
 }
 
-.supply-stat {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-}
-
-.supply-value {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-}
-
-.value-number {
-  font-size: 2.5rem;
-  line-height: 1;
-}
-
-.value-unit {
-  font-size: 1rem;
-  color: #d4a24c;
-}
-
-.supply-details {
+.product-right {
+  width: 55%;
+  height: 100%;
+  background: #f5f0e8;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  padding: 2rem 2.5rem 2rem 2.5rem;
 }
 
-.supply-label {
-  font-size: 0.75rem;
+.right-content {
+  max-width: 100%;
+}
+
+.section-label {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: rgba(245, 240, 232, 0.5);
+  letter-spacing: 0.25em;
+  color: #c45b28;
+  margin-bottom: 0.75rem;
 }
 
-.supply-desc {
-  font-size: 0.95rem;
-  color: rgba(245, 240, 232, 0.8);
-}
-
-.specs-label {
-  font-size: 0.875rem;
-  letter-spacing: 0.2em;
-}
-
-.specs-title {
-  font-size: 1.75rem;
+.product-title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 700;
+  color: #2c2416;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  font-family: 'Jakarta Sans', sans-serif;
 }
 
-.spec-item {
-  padding: 1.25rem;
-}
-
-.spec-parameter {
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-}
-
-.spec-value {
-  display: flex;
-  align-items: baseline;
-  gap: 0.25rem;
-}
-
-.spec-value .value {
-  font-size: 1.5rem;
-  font-weight: 700;
-}
-
-.spec-value .unit {
-  font-size: 0.875rem;
+.title-accent {
   color: #c45b28;
 }
 
-.feature-card {
-  padding: 1.5rem;
+.product-description {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: rgba(44, 36, 22, 0.75);
+  margin-bottom: 1.5rem;
+  max-width: 90%;
 }
 
-.feature-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
+.specs-section {
+  margin-bottom: 1.25rem;
+}
+
+.specs-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #2c2416;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.specs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.spec-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #faf7f2;
+  border: 1px solid rgba(44, 36, 22, 0.08);
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.spec-card:hover {
+  border-color: rgba(196, 91, 40, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(44, 36, 22, 0.08);
+}
+
+.spec-icon {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 1rem;
+  background: rgba(196, 91, 40, 0.08);
+  border-radius: 6px;
+}
+
+.spec-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.spec-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.spec-parameter {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(44, 36, 22, 0.5);
+  font-weight: 500;
+}
+
+.spec-value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.375rem;
+}
+
+.spec-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2c2416;
+  font-family: 'Jakarta Sans', sans-serif;
+}
+
+.spec-unit {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #c45b28;
+}
+
+.features-section {
+  margin-top: 1rem;
+}
+
+.features-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #2c2416;
+  margin-bottom: 0.75rem;
+  opacity: 0.8;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.feature-card {
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  background: #2c2416;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  background: #3a3025;
+  transform: translateY(-3px);
+}
+
+.feature-icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(196, 91, 40, 0.15);
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+  background: #c45b28;
+}
+
+.feature-icon img {
+  width: 22px;
+  height: 22px;
 }
 
 .feature-title {
-  font-size: 1.125rem;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #f5f0e8;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.375rem;
+  font-family: 'Jakarta Sans', sans-serif;
 }
 
-.feature-desc {
-  font-size: 0.875rem;
-  line-height: 1.6;
-  color: rgba(245, 240, 232, 0.7);
+.feature-description {
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: rgba(245, 240, 232, 0.6);
 }
 
-@media (max-width: 1024px) {
-  .product-section {
-    flex-direction: column;
-    height: auto;
+@media (max-width: 1200px) {
+  .product-left {
+    clip-path: polygon(0 0, calc(100% - 60px) 0, 100% 100%, 0 100%);
   }
 
-  .product-intro,
-  .product-specs {
-    width: 100%;
-    padding: 4rem 2rem;
+  .left-content {
+    padding: 3rem 2rem 3rem 3rem;
   }
 
-  .certification-badges {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .cert-badge {
-    width: 100%;
+  .product-right {
+    padding: 3rem 3rem 3rem 2rem;
   }
 
   .specs-grid {
@@ -476,18 +722,86 @@ onMounted(() => {
   }
 }
 
-@media (max-width: 640px) {
-  .product-intro,
-  .product-specs {
-    padding: 3rem 1.5rem;
+@media (max-width: 1024px) {
+  .product-section {
+    height: auto;
+    min-height: 100vh;
   }
 
-  .product-title {
-    font-size: 2rem;
+  .product-container {
+    flex-direction: column;
   }
 
-  .product-description {
-    font-size: 1rem;
+  .product-left {
+    width: 100%;
+    height: 50vh;
+    min-height: 400px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 40px), 0 100%);
+  }
+
+  .product-right {
+    width: 100%;
+    height: auto;
+    padding: 3rem 2rem;
+  }
+
+  .left-content {
+    padding: 2rem;
+    justify-content: center;
+  }
+
+  .product-visual {
+    display: none;
+  }
+
+  .capacity-badge {
+    flex-direction: row;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem 1.5rem;
+  }
+
+  .cert-row {
+    flex-direction: row;
+  }
+
+  .cert-badge {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .product-left {
+    height: 45vh;
+    min-height: 350px;
+    clip-path: none;
+  }
+
+  .product-right {
+    padding: 2rem 1.5rem;
+  }
+
+  .left-content {
+    padding: 1.5rem;
+  }
+
+  .capacity-badge {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  .value-number {
+    font-size: 2.5rem;
+  }
+
+  .cert-row {
+    flex-direction: column;
+  }
+
+  .cert-badge {
+    width: 100%;
   }
 
   .specs-grid {
@@ -498,10 +812,43 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .supply-stat {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+  .product-description {
+    font-size: 1rem;
+  }
+
+  .product-title {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-left {
+    height: 40vh;
+    min-height: 300px;
+  }
+
+  .capacity-badge {
+    padding: 1rem;
+  }
+
+  .value-number {
+    font-size: 2rem;
+  }
+
+  .capacity-label {
+    font-size: 0.75rem;
+  }
+
+  .feature-card {
+    padding: 1.25rem;
+  }
+
+  .spec-card {
+    padding: 0.875rem 1rem;
+  }
+
+  .spec-value {
+    font-size: 1.125rem;
   }
 }
 </style>
