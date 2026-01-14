@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 import asiaMapUrl from '~/assets/images/asiaLow.svg?url'
 
 const { $gsap } = useNuxtApp()
+let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -13,48 +14,60 @@ onMounted(() => {
     return
   }
 
-  $gsap.from('.geo-label', {
-    y: 30,
-    opacity: 0,
-    duration: 0.8,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '#geographic', start: 'top 70%' }
+  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
+  const tl = $gsap.timeline({
+    scrollTrigger: {
+      trigger: '#geographic',
+      start: 'top 65%'
+    }
   })
 
-  $gsap.from('.geo-title', {
-    y: 40,
-    opacity: 0,
-    duration: 1,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '#geographic', start: 'top 65%' }
-  }, '-=0.4')
+  tl.set('.geo-label', { opacity: 0, y: 30 })
+  tl.set('.geo-title', { opacity: 0, y: 40 })
+  tl.set('.geo-card', { opacity: 0, y: 50, scale: 0.95 })
+  tl.set('.market-item', { opacity: 0, x: -20 })
+  tl.set('.singapore-card', { opacity: 0, x: 100 })
 
-  $gsap.from('.geo-card', {
-    y: 50,
-    opacity: 0,
+  // 0ms: Label and title
+  tl.to('.geo-label', {
+    opacity: 1,
+    y: 0,
+    duration: 0.6,
+    ease: 'power3.out'
+  })
+  tl.to('.geo-title', {
+    opacity: 1,
+    y: 0,
     duration: 0.8,
-    stagger: 0.12,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '#geographic', start: 'top 60%' }
+    ease: 'power3.out'
   }, '-=0.3')
 
-  $gsap.from('.market-item', {
-    x: -20,
-    opacity: 0,
+  // 200ms: Geo cards stagger
+  tl.to('.geo-card', {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    duration: 0.6,
+    stagger: 0.12,
+    ease: 'power3.out'
+  }, '+=0.1')
+
+  // 400ms: Market items and Singapore card
+  tl.to('.market-item', {
+    opacity: 1,
+    x: 0,
     duration: 0.5,
     stagger: 0.06,
-    ease: 'power2.out',
-    scrollTrigger: { trigger: '#geographic', start: 'top 55%' }
-  }, '-=0.2')
+    ease: 'power2.out'
+  }, '+=0.1')
+  tl.to('.singapore-card', {
+    opacity: 1,
+    x: 0,
+    duration: 0.8,
+    ease: 'power3.out'
+  }, '-=0.3')
 
-  $gsap.from('.singapore-card', {
-    x: 100,
-    opacity: 0,
-    duration: 1,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '#geographic', start: 'top 50%' }
-  }, '-=0.4')
-
+  // Indonesia map subtle animation
   $gsap.fromTo('.indonesia-focus', 
     { scale: 1, opacity: 0.8 },
     { 
@@ -67,6 +80,40 @@ onMounted(() => {
       scrollTrigger: { trigger: '#geographic', start: 'top bottom' }
     }
   )
+
+  // Apply hover scale effects to geo cards
+  document.querySelectorAll('.geo-card').forEach((card) => {
+    const el = card as HTMLElement
+    const onEnter = () => {
+      if (shouldReduceMotion) return
+      $gsap.to(el, { scale: 1.02, duration: 0.3, ease: 'power2.out' })
+    }
+    const onLeave = () => {
+      $gsap.to(el, { scale: 1, duration: 0.3, ease: 'power2.out' })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    cleanupFns.push(() => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    })
+  })
+
+  // Scroll parallax on Singapore card
+  $gsap.to('.singapore-card', {
+    scrollTrigger: {
+      trigger: '.singapore-card',
+      start: 'top 75%',
+      end: 'bottom 25%',
+      scrub: 0.5
+    },
+    y: -10,
+    ease: 'none'
+  })
+})
+
+onUnmounted(() => {
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 
 const geographicData = {

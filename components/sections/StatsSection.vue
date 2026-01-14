@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 import IconRspoSmall from '../ui/icons/IconRspoSmall.vue'
 import IconIsccSmall from '../ui/icons/IconIsccSmall.vue'
@@ -24,7 +25,8 @@ const stats: StatItem[] = [
 
 const narrativeText = `From our plantations in Kalimantan, NPI produces over 380,000 metric tons of premium crude palm oil, employing over 2,800 people across our operations.`
 
-const { $gsap } = useNuxtApp()
+const { $gsap, $animation } = useNuxtApp()
+let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -34,49 +36,85 @@ onMounted(() => {
     return
   }
 
-  $gsap.fromTo('.revenue-hero',
-    { opacity: 0, y: 40 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: '#stats',
-        start: 'top 70%'
-      }
-    }
-  )
+  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
+  const tl = $gsap.timeline()
 
-  $gsap.fromTo('.stat-row',
-    { opacity: 0, x: 30 },
-    {
-      opacity: 1,
-      x: 0,
-      duration: 0.8,
-      stagger: 0.15,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.stats-column',
-        start: 'top 60%'
-      }
-    }
-  )
+  tl.set('.hero-content', { opacity: 0, y: 30 })
+  tl.set('.stat-row', { opacity: 0, y: 40 })
+  tl.set('.cert-row', { opacity: 0, y: 20 })
 
-  $gsap.fromTo('.cert-row',
-    { opacity: 0, y: 20 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.6,
-      delay: 0.5,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.cert-row',
-        start: 'top 80%'
-      }
+  // 0ms: Hero content
+  tl.to('.hero-content', {
+    opacity: 1,
+    y: 0,
+    duration: 0.8,
+    ease: 'power3.out',
+    scrollTrigger: {
+      trigger: '#stats',
+      start: 'top 70%'
     }
-  )
+  })
+
+  // 200ms: Stats stagger in
+  tl.to('.stat-row', {
+    opacity: 1,
+    x: 0,
+    duration: 0.6,
+    stagger: 0.12,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: '.stats-column',
+      start: 'top 60%'
+    }
+  }, '+=0.1')
+
+  // 400ms: Certifications reveal
+  tl.to('.cert-row', {
+    opacity: 1,
+    y: 0,
+    duration: 0.5,
+    ease: 'power2.out',
+    scrollTrigger: {
+      trigger: '.cert-row',
+      start: 'top 80%'
+    }
+  }, '+=0.1')
+
+  // Apply hover scale effects to stat rows
+  document.querySelectorAll('.stat-row').forEach((row) => {
+    const el = row as HTMLElement
+    const onEnter = () => {
+      if (shouldReduceMotion) return
+      $gsap.to(el, { scale: 1.02, duration: 0.3, ease: 'power2.out' })
+    }
+    const onLeave = () => {
+      $gsap.to(el, { scale: 1, duration: 0.3, ease: 'power2.out' })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    cleanupFns.push(() => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    })
+  })
+
+  // Scroll parallax on stat rows
+  document.querySelectorAll('.stat-row').forEach((row) => {
+    $gsap.to(row, {
+      scrollTrigger: {
+        trigger: row,
+        start: 'top 80%',
+        end: 'bottom 20%',
+        scrub: 0.5
+      },
+      y: -10,
+      ease: 'none'
+    })
+  })
+})
+
+onUnmounted(() => {
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 </script>
 

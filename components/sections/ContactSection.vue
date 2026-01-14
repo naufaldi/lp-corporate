@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useNuxtApp } from '#app'
 
 interface ContactInfo {
@@ -20,6 +20,7 @@ interface Office {
 }
 
 const { $gsap } = useNuxtApp()
+let cleanupFns: Array<() => void> = []
 
 const contactInfo: ContactInfo[] = [
   {
@@ -92,10 +93,7 @@ onMounted(() => {
     return
   }
 
-  $gsap.set('.contact-hero', { opacity: 0, y: 40 })
-  $gsap.set('.contact-content', { opacity: 0, y: 60 })
-  $gsap.set('.hero-stat', { opacity: 0, scale: 0.8 })
-
+  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
   const tl = $gsap.timeline({
     scrollTrigger: {
       trigger: '#contact',
@@ -103,70 +101,136 @@ onMounted(() => {
     }
   })
 
+  tl.set('.contact-hero', { opacity: 0, y: 40 })
+  tl.set('.contact-content', { opacity: 0, y: 60 })
+  tl.set('.hero-stat', { opacity: 0, scale: 0.8 })
+  tl.set('.info-card', { opacity: 0, y: 30 })
+  tl.set('.office-card', { opacity: 0, x: -20 })
+  tl.set('.form-group', { opacity: 0, y: 20 })
+
+  // 0ms: Hero content
   tl.to('.contact-hero', {
     opacity: 1,
     y: 0,
     duration: 1,
     ease: 'power3.out'
   })
-  .to('.hero-stat', {
+
+  // 200ms: Hero stats stagger
+  tl.to('.hero-stat', {
     opacity: 1,
     scale: 1,
     duration: 0.5,
-    stagger: 0.15,
+    stagger: 0.12,
     ease: 'back.out(1.5)'
-  }, '-=0.5')
-  .to('.contact-content', {
+  }, '+=0.1')
+
+  // 400ms: Contact content with info cards
+  tl.to('.contact-content', {
     opacity: 1,
     y: 0,
     duration: 0.8,
     ease: 'power2.out'
+  }, '+=0.1')
+
+  // Info cards stagger
+  tl.to('.info-card', {
+    opacity: 1,
+    y: 0,
+    duration: 0.5,
+    stagger: 0.1,
+    ease: 'power2.out'
   }, '-=0.3')
 
-  $gsap.fromTo('.info-card',
-    { opacity: 0, y: 30 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.5,
-      stagger: 0.1,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.info-grid',
-        start: 'top 75%'
-      }
-    }
-  )
+  // Office cards stagger
+  tl.to('.office-card', {
+    opacity: 1,
+    x: 0,
+    duration: 0.5,
+    stagger: 0.15,
+    ease: 'power2.out'
+  }, '+=0.1')
 
-  $gsap.fromTo('.office-card',
-    { opacity: 0, x: -20 },
-    {
-      opacity: 1,
-      x: 0,
-      duration: 0.5,
-      stagger: 0.15,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.offices-section',
-        start: 'top 70%'
-      }
-    }
-  )
+  // Form groups stagger
+  tl.to('.form-group', {
+    opacity: 1,
+    y: 0,
+    duration: 0.4,
+    stagger: 0.08,
+    ease: 'power2.out'
+  }, '+=0.1')
 
-  $gsap.fromTo('.form-group',
-    { opacity: 0, y: 20 },
-    {
-      opacity: 1,
-      y: 0,
-      duration: 0.4,
-      stagger: 0.08,
-      ease: 'power2.out',
-      scrollTrigger: {
-        trigger: '.contact-form',
-        start: 'top 70%'
-      }
+  // Apply hover scale effects to info cards
+  document.querySelectorAll('.info-card').forEach((card) => {
+    const el = card as HTMLElement
+    const onEnter = () => {
+      if (shouldReduceMotion) return
+      $gsap.to(el, { scale: 1.02, x: 8, duration: 0.3, ease: 'power2.out' })
     }
-  )
+    const onLeave = () => {
+      $gsap.to(el, { scale: 1, x: 0, duration: 0.3, ease: 'power2.out' })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    cleanupFns.push(() => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    })
+  })
+
+  // Apply hover scale effects to office cards
+  document.querySelectorAll('.office-card').forEach((card) => {
+    const el = card as HTMLElement
+    const onEnter = () => {
+      if (shouldReduceMotion) return
+      $gsap.to(el, { scale: 1.02, y: -4, duration: 0.3, ease: 'power2.out' })
+    }
+    const onLeave = () => {
+      $gsap.to(el, { scale: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    cleanupFns.push(() => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    })
+  })
+
+  // Apply focus ring animation to form inputs
+  document.querySelectorAll('.form-input, .form-textarea').forEach((input) => {
+    const el = input as HTMLElement
+    const onFocus = () => {
+      if (shouldReduceMotion) return
+      $gsap.to(el, { scale: 1.01, duration: 0.2, ease: 'power2.out' })
+    }
+    const onBlur = () => {
+      $gsap.to(el, { scale: 1, duration: 0.2, ease: 'power2.out' })
+    }
+    el.addEventListener('focus', onFocus)
+    el.addEventListener('blur', onBlur)
+    cleanupFns.push(() => {
+      el.removeEventListener('focus', onFocus)
+      el.removeEventListener('blur', onBlur)
+    })
+  })
+
+  // Scroll parallax on office cards
+  document.querySelectorAll('.office-card').forEach((card) => {
+    $gsap.to(card, {
+      scrollTrigger: {
+        trigger: card,
+        start: 'top 80%',
+        end: 'bottom 20%',
+        scrub: 0.5
+      },
+      y: -6,
+      ease: 'none'
+    })
+  })
+})
+
+onUnmounted(() => {
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 </script>
 

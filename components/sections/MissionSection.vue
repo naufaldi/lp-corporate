@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 
 const { $gsap } = useNuxtApp()
+let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -12,38 +13,91 @@ onMounted(() => {
     return
   }
 
-  $gsap.from('.left-content', {
-    y: 60,
-    duration: 1.2,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '#mission', start: 'top 75%' }
+  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
+  const tl = $gsap.timeline({
+    scrollTrigger: {
+      trigger: '#mission',
+      start: 'top 70%'
+    }
   })
 
-  $gsap.from('.right-inner', {
-    y: 60,
-    duration: 1.2,
-    ease: 'power3.out',
-    scrollTrigger: { trigger: '#mission', start: 'top 75%' }
+  tl.set('.left-content', { opacity: 0, y: 50 })
+  tl.set('.right-inner', { opacity: 0, y: 50 })
+  tl.set('.value-card', { opacity: 0, y: 30, scale: 0.95 })
+
+  // 0ms: Left content
+  tl.to('.left-content', {
+    opacity: 1,
+    y: 0,
+    duration: 0.8,
+    ease: 'power3.out'
   })
 
-  $gsap.from('.value-card', {
-    y: 30,
-    duration: 0.6,
+  // 200ms: Right content
+  tl.to('.right-inner', {
+    opacity: 1,
+    y: 0,
+    duration: 0.8,
+    ease: 'power3.out'
+  }, '+=0.1')
+
+  // 400ms: Value cards stagger
+  tl.to('.value-card', {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    duration: 0.5,
     stagger: 0.1,
-    ease: 'power2.out',
-    scrollTrigger: { trigger: '.right-inner', start: 'top 80%' }
-  })
+    ease: 'back.out(1.2)'
+  }, '+=0.1')
 
+  // Parallax on background
   $gsap.to('.bg-parallax', {
-    yPercent: 15,
-    ease: 'none',
     scrollTrigger: {
       trigger: '#mission',
       start: 'top bottom',
       end: 'bottom top',
       scrub: true
-    }
+    },
+    yPercent: 15,
+    ease: 'none'
   })
+
+  // Apply hover scale effects to value cards
+  document.querySelectorAll('.value-card').forEach((card) => {
+    const el = card as HTMLElement
+    const onEnter = () => {
+      if (shouldReduceMotion) return
+      $gsap.to(el, { scale: 1.03, y: -4, duration: 0.3, ease: 'power2.out' })
+    }
+    const onLeave = () => {
+      $gsap.to(el, { scale: 1, y: 0, duration: 0.3, ease: 'power2.out' })
+    }
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
+    cleanupFns.push(() => {
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
+    })
+  })
+
+  // Scroll parallax on value cards
+  document.querySelectorAll('.value-card').forEach((card) => {
+    $gsap.to(card, {
+      scrollTrigger: {
+        trigger: card,
+        start: 'top 80%',
+        end: 'bottom 20%',
+        scrub: 0.5
+      },
+      y: -8,
+      ease: 'none'
+    })
+  })
+})
+
+onUnmounted(() => {
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 
 const missionText = "To secure Asia's palm oil supply through sustainable, scalable operations that deliver consistent quality while protecting Indonesia's forests and communities for future generations."

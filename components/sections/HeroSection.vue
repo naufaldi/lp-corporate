@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
+import FlowParticles from '~/components/ui/FlowParticles.vue'
 
-const { $gsap } = useNuxtApp()
+const { $gsap, $animation } = useNuxtApp()
 
 const scrollToStats = () => {
   const statsSection = document.querySelector('#stats')
@@ -28,6 +29,8 @@ const onImageError = (e: Event) => {
   const img = e.target as HTMLImageElement
   img.style.display = 'none'
 }
+
+let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -82,18 +85,33 @@ onMounted(() => {
     ease: 'power2.out'
   }, '-=0.2')
 
+  // Apply hover effects
+  const cleanupHover = $animation?.hoverScale?.('.hero-cta', { scale: 1.03, duration: 0.3 })
+  const cleanupMagnetic = $animation?.magneticButton?.('.hero-cta', { strength: 20, duration: 0.25 })
+  
+  if (cleanupHover) cleanupFns.push(cleanupHover)
+  if (cleanupMagnetic) cleanupFns.push(cleanupMagnetic)
+
+  // Parallax on scroll
+  $animation?.parallaxFlow?.('.hero-bg', { speed: 0.15, direction: 'left', scrub: true })
+
+  // Animate floating particles
   $gsap.to('.floating-particle', {
-    y: -30,
-    rotation: 180,
-    duration: 8,
+    y: -40,
+    rotation: 360,
+    duration: 12,
     repeat: -1,
     yoyo: true,
     ease: 'sine.inOut',
     stagger: {
-      each: 0.5,
+      each: 1.5,
       from: 'random'
     }
   })
+})
+
+onUnmounted(() => {
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 </script>
 
@@ -113,6 +131,14 @@ onMounted(() => {
       <div class="overlay-noise"></div>
       <div class="overlay-gradient"></div>
       <div class="overlay-vignette"></div>
+      <FlowParticles 
+        :count="6" 
+        color="#e6b84d" 
+        speed="medium" 
+        direction="right"
+        size="small"
+        :opacity="0.3"
+      />
       <div class="floating-particles">
         <div class="particle particle-1 floating-particle"></div>
         <div class="particle particle-2 floating-particle"></div>
@@ -357,6 +383,8 @@ onMounted(() => {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .hero-cta:hover {
