@@ -1,134 +1,79 @@
 <script setup lang="ts">
 import { useNuxtApp } from '#app'
-import IconExportsPremium from '../ui/icons/IconExportsPremium.vue'
-import IconHectaresPremium from '../ui/icons/IconHectaresPremium.vue'
-import IconEmployeesPremium from '../ui/icons/IconEmployeesPremium.vue'
-import IconRevenuePremium from '../ui/icons/IconRevenuePremium.vue'
 import IconRspoSmall from '../ui/icons/IconRspoSmall.vue'
 import IconIsccSmall from '../ui/icons/IconIsccSmall.vue'
-import IconAsiaSimple from '../ui/icons/IconAsiaSimple.vue'
+import IconHectaresPremium from '../ui/icons/IconHectaresPremium.vue'
+import IconExportsPremium from '../ui/icons/IconExportsPremium.vue'
+import IconEmployeesPremium from '../ui/icons/IconEmployeesPremium.vue'
 
 interface StatItem {
   id: string
   value: number
+  displayValue: string
   suffix: string
   label: string
-  description: string
-  iconName: string
+  icon: object
+  accentColor: string
 }
 
 const stats: StatItem[] = [
-  { id: 'exports', value: 380000, suffix: '+', label: 'Annual Exports', description: 'Metric tons of CPO', iconName: 'exports' },
-  { id: 'hectares', value: 85000, suffix: '', label: 'Total Area', description: 'Hectares managed', iconName: 'hectares' },
-  { id: 'employees', value: 2800, suffix: '+', label: 'Workforce', description: 'Employees across ops', iconName: 'employees' },
-  { id: 'revenue', value: 280, suffix: 'M+', label: 'Export Revenue', description: 'USD million annually', iconName: 'revenue' }
+  { id: 'hectares', value: 85000, displayValue: '85,000', suffix: 'ha', label: 'Total Plantation Area', icon: IconHectaresPremium, accentColor: '#d4a24c' },
+  { id: 'exports', value: 380000, displayValue: '380K', suffix: '+', label: 'Metric Tons Annual Exports', icon: IconExportsPremium, accentColor: '#c45b28' },
+  { id: 'employees', value: 2800, displayValue: '2,800', suffix: '+', label: 'Employees Across Operations', icon: IconEmployeesPremium, accentColor: '#2a5c55' }
 ]
 
-const iconMap: Record<string, object> = {
-  exports: IconExportsPremium,
-  hectares: IconHectaresPremium,
-  employees: IconEmployeesPremium,
-  revenue: IconRevenuePremium
-}
-
-function getIcon(name: string) {
-  return iconMap[name]
-}
-
-const contextText = 'From our plantations in Kalimantan to ports across Asia, NPI delivers sustainable palm oil that powers industries and communities.'
+const narrativeText = `From our plantations in Kalimantan, NPI produces over 380,000 metric tons of premium crude palm oil, employing over 2,800 people across our operations.`
 
 const { $gsap } = useNuxtApp()
 
 onMounted(() => {
-  // Counter animation
-  const statNumbers = document.querySelectorAll('.stat-number')
+  const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
-  statNumbers.forEach((el) => {
-    const target = parseInt(el.getAttribute('data-target') || '0')
+  if (shouldReduceMotion) {
+    $gsap.set(['.hero-content', '.stat-row', '.cert-row'], { opacity: 1 })
+    return
+  }
 
-    $gsap.fromTo(el,
-      { textContent: 0 },
-      {
-        textContent: target,
-        duration: 2,
-        ease: 'power2.out',
-        snap: { textContent: 1 },
-        scrollTrigger: {
-          trigger: '.stats-section',
-          start: 'top 60%',
-          toggleActions: 'play none none reverse'
-        },
-        onUpdate: function() {
-          el.textContent = Math.ceil(this.targets()[0].textContent).toLocaleString()
-        }
-      }
-    )
-  })
-
-  // Stat cards reveal
-  $gsap.fromTo('.stat-card',
-    { y: 30, opacity: 0 },
+  $gsap.fromTo('.revenue-hero',
+    { opacity: 0, y: 40 },
     {
+      opacity: 1,
       y: 0,
-      opacity: 1,
-      duration: 0.6,
-      stagger: 0.1,
-      ease: 'power2.out',
+      duration: 1,
+      ease: 'power3.out',
       scrollTrigger: {
-        trigger: '.stats-panel',
-        start: 'top 70%',
-        toggleActions: 'play none none reverse'
+        trigger: '#stats',
+        start: 'top 70%'
       }
     }
   )
 
-  // Icons reveal
-  $gsap.fromTo('.stat-icon svg',
-    { scale: 0.8, opacity: 0 },
+  $gsap.fromTo('.stat-row',
+    { opacity: 0, x: 30 },
     {
-      scale: 1,
       opacity: 1,
-      duration: 0.4,
-      stagger: 0.1,
-      delay: 0.1,
-      ease: 'back.out(1.7)',
-      scrollTrigger: {
-        trigger: '.stats-panel',
-        start: 'top 70%',
-        toggleActions: 'play none none reverse'
-      }
-    }
-  )
-
-  // Context content reveal
-  $gsap.fromTo('.context-content',
-    { x: 20, opacity: 0 },
-    {
       x: 0,
-      opacity: 1,
-      duration: 0.6,
+      duration: 0.8,
+      stagger: 0.15,
       ease: 'power2.out',
       scrollTrigger: {
-        trigger: '.context-panel',
-        start: 'top 70%',
-        toggleActions: 'play none none reverse'
+        trigger: '.stats-column',
+        start: 'top 60%'
       }
     }
   )
 
-  // Map reveal
-  $gsap.fromTo('.asia-map svg',
-    { scale: 0.9, opacity: 0 },
+  $gsap.fromTo('.cert-row',
+    { opacity: 0, y: 20 },
     {
-      scale: 1,
       opacity: 1,
+      y: 0,
       duration: 0.6,
-      delay: 0.2,
+      delay: 0.5,
       ease: 'power2.out',
       scrollTrigger: {
-        trigger: '.context-panel',
-        start: 'top 70%',
-        toggleActions: 'play none none reverse'
+        trigger: '.cert-row',
+        start: 'top 80%'
       }
     }
   )
@@ -136,81 +81,93 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="stats" class="stats-section min-h-screen-100 flex">
-    <div class="stats-panel w-3/5 bg-[#2c2416] flex items-center justify-center px-16 py-20 relative z-10">
-      <div class="cert-row flex items-center gap-4 mb-12">
-        <div class="w-12 h-12 flex items-center justify-center">
-          <IconRspoSmall />
-        </div>
-        <div class="w-12 h-12 flex items-center justify-center">
-          <IconIsccSmall />
-        </div>
-        <span class="text-[#f5f0e8]/60 text-sm ml-2">
-          RSPO Certified 2019 | ISCC EU
+  <section id="stats" class="stats-section h-screen flex flex-col lg:flex-row overflow-hidden">
+    <div class="hero-statement w-full lg:w-1/2 bg-[#f5f0e8] flex flex-col justify-center px-8 lg:px-24 py-16 lg:py-0 relative">
+      <div class="hero-content max-w-xl">
+        <span class="section-label text-sm uppercase tracking-[0.3em] text-[#c45b28] mb-8 block">
+          By The Numbers
         </span>
-      </div>
 
-      <div class="stats-grid grid grid-cols-2 gap-x-16 gap-y-12 w-full max-w-2xl">
-        <div v-for="stat in stats" :key="stat.id" class="stat-card border-l-4 border-[#d4a24c] pl-6 py-2">
-          <div class="stat-icon w-12 h-12 text-[#d4a24c] mb-4">
-            <component :is="getIcon(stat.iconName)" />
+        <div class="revenue-hero mb-10">
+          <span class="revenue-currency text-4xl lg:text-6xl font-light text-[#2c2416]">$</span>
+          <span class="revenue-value text-7xl lg:text-[10rem] leading-[0.9] font-bold text-[#2c2416] tabular-nums">280M</span>
+          <span class="revenue-suffix text-2xl lg:text-3xl text-[#d4a24c]">+</span>
+          <div class="revenue-label mt-6 text-lg lg:text-xl text-[#2c2416]/60">
+            Export Revenue Annually
           </div>
-          <div class="stat-number text-5xl md:text-6xl font-bold text-[#d4a24c]" :data-target="stat.value">
-            0{{ stat.suffix }}
+        </div>
+
+        <p class="narrative-text text-xl lg:text-2xl text-[#2c2416]/80 leading-relaxed mb-12">
+          From our <span class="text-[#c45b28] font-semibold">85,000 hectares</span> of sustainable plantations in Kalimantan, NPI produces over <span class="text-[#c45b28] font-semibold">380,000 metric tons</span> of premium crude palm oil, employing <span class="text-[#2a5c55] font-semibold">2,800+ people</span> across our operations.
+        </p>
+
+        <div class="cert-row flex flex-wrap items-center gap-6 lg:gap-8">
+          <span class="text-xs uppercase tracking-widest text-[#2c2416]/40">Certifications</span>
+          <div class="w-px h-8 bg-[#2c2416]/10"></div>
+          <div class="flex items-center gap-4">
+            <IconRspoSmall class="w-10 h-10 lg:w-12 lg:h-12" />
+            <IconIsccSmall class="w-10 h-10 lg:w-12 lg:h-12" />
           </div>
-          <div class="stat-label text-xl text-[#f5f0e8] mt-3 font-medium">{{ stat.label }}</div>
-          <div class="stat-desc text-sm text-[#f5f0e8]/60 mt-1">{{ stat.description }}</div>
+          <span class="text-sm lg:text-base text-[#2c2416]/60 hidden sm:block">RSPO Certified 2019 | ISCC EU</span>
         </div>
       </div>
     </div>
 
-    <div class="context-panel w-2/5 bg-[#f5f0e8] flex items-center justify-center px-16 py-20 relative overflow-hidden">
-      <div class="context-content relative z-10 max-w-md">
-        <h3 class="text-3xl md:text-4xl font-bold text-[#2c2416] mb-6 leading-tight">
-          From Indonesia to Asia
-        </h3>
-
-        <p class="text-lg text-[#2c2416]/80 leading-relaxed mb-8">
-          {{ contextText }}
-        </p>
-
-        <div class="asia-map w-full h-24 mb-6">
-          <IconAsiaSimple />
+    <div class="stats-column w-full lg:w-1/2 bg-[#2c2416] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0 overflow-y-auto">
+      <div
+          class="stat-row flex items-center gap-6 lg:gap-10 mb-10 lg:mb-16 pb-10 lg:pb-16 border-b border-[#f5f0e8]/10"
+          v-for="(stat, index) in stats"
+          :key="stat.id"
+          :class="{ 'border-b-0': index === stats.length - 1 }"
+        >
+          <div class="stat-icon w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0" :style="{ color: stat.accentColor }">
+            <component :is="stat.icon" />
+          </div>
+          <div>
+            <div class="stat-value flex items-baseline gap-2 lg:gap-3">
+              <span class="text-5xl lg:text-7xl font-bold text-[#f5f0e8] tabular-nums tracking-tight">{{ stat.displayValue }}</span>
+              <span class="text-xl lg:text-2xl" :style="{ color: stat.accentColor }">{{ stat.suffix }}</span>
+            </div>
+            <div class="stat-label text-xs lg:text-sm uppercase tracking-widest text-[#f5f0e8]/40 mt-3 lg:mt-4">
+              {{ stat.label }}
+            </div>
+          </div>
         </div>
-
-        <div class="flex flex-wrap gap-4 text-sm">
-          <span class="text-[#2c2416]/60">Exporting to:</span>
-          <span class="text-[#2a5c55] font-medium">China, India, Singapore</span>
-          <span class="text-[#2c2416]/40">+ 5 more</span>
-        </div>
-      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.stats-grid {
-  gap: 3rem 4rem;
+.stats-section {
+  min-height: 100vh;
 }
 
-.stat-card {
-  transition: all 0.3s ease;
+.section-label {
+  font-size: 0.875rem;
+  letter-spacing: 0.3em;
 }
 
-.stat-card:hover {
-  transform: translateX(8px);
-  background: rgba(212, 162, 76, 0.08);
+.revenue-currency {
+  font-size: 1.5rem;
 }
 
-.stat-number {
-  font-variant-numeric: tabular-nums;
+.revenue-value {
+  font-size: 7rem;
+  line-height: 0.9;
   letter-spacing: -0.02em;
 }
 
-.cert-row {
-  position: absolute;
-  top: 3rem;
-  left: 4rem;
+.revenue-suffix {
+  font-size: 1.25rem;
+}
+
+.revenue-label {
+  font-size: 1.125rem;
+  margin-top: 1.5rem;
+}
+
+.stat-value {
+  line-height: 1;
 }
 
 .stat-icon :deep(svg) {
@@ -218,39 +175,116 @@ onMounted(() => {
   height: 100%;
 }
 
-.asia-map :deep(svg) {
-  width: 100%;
-  height: 100%;
+@media (max-width: 1024px) {
+  .revenue-value {
+    font-size: 6rem;
+  }
+
+  .stat-icon {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .stat-value span:first-child {
+    font-size: 3.5rem;
+  }
 }
 
 @media (max-width: 768px) {
   .stats-section {
-    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
   }
 
-  .stats-panel,
-  .context-panel {
-    width: 100%;
-    min-height: auto;
-    padding: 3rem 1.5rem;
+  .hero-statement {
+    padding: 4rem 2rem;
   }
 
-  .cert-row {
-    position: static;
-    margin-bottom: 2rem;
-    justify-content: center;
+  .stats-column {
+    padding: 4rem 2rem;
   }
 
-  .stats-grid {
-    gap: 2rem 1.5rem;
+  .revenue-hero {
+    margin-bottom: 3rem;
   }
 
-  .stat-number {
+  .revenue-currency {
+    font-size: 1.25rem;
+  }
+
+  .revenue-value {
+    font-size: 4.5rem;
+  }
+
+  .revenue-suffix {
+    font-size: 1.125rem;
+  }
+
+  .revenue-label {
+    font-size: 1rem;
+    margin-top: 1rem;
+  }
+
+  .narrative-text {
+    font-size: 1.125rem;
+    margin-bottom: 3rem;
+  }
+
+  .stat-row {
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .stat-icon {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .stat-value span:first-child {
     font-size: 2.5rem;
   }
 
-  .asia-map {
-    height: 120px;
+  .stat-icon :deep(svg) {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-statement {
+    padding: 3rem 1.5rem;
+  }
+
+  .stats-column {
+    padding: 3rem 1.5rem;
+  }
+
+  .revenue-value {
+    font-size: 3.5rem;
+  }
+
+  .cert-row {
+    gap: 1rem;
+  }
+
+  .cert-row .w-px {
+    display: none;
+  }
+
+  .stat-row {
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+  }
+
+  .stat-icon {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .stat-value span:first-child {
+    font-size: 2rem;
   }
 }
 </style>
