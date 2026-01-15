@@ -78,8 +78,8 @@ const values = [
 </script>
 
 <template>
-  <section id="mission" class="panel relative h-screen min-h-[700px] overflow-hidden bg-[#0d0b08]">
-    <div class="absolute inset-0 z-0">
+  <section id="mission" aria-label="Mission and Vision" class="panel relative h-screen min-h-[700px] overflow-hidden bg-[#0d0b08]">
+    <div class="absolute inset-0 z-0" aria-hidden="true">
       <div class="bg-parallax absolute inset-0 bg-cover bg-center bg-no-repeat"></div>
       <div class="absolute inset-0 bg-gradient-to-r from-[#0d0b08]/98 via-[#0d0b08]/90 to-[#0d0b08]/85"></div>
       <div class="absolute inset-0 opacity-[0.035] pointer-events-none" :style="{ backgroundImage: 'url(data:image/svg+xml,%3Csvg viewBox=%220 0 600 400%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noise%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noise)%22/%3E%3C/svg%3E)' }"></div>
@@ -89,24 +89,25 @@ const values = [
 
     <div class="relative z-10 h-full flex flex-col lg:flex-row">
       <div class="left-content flex-1 flex flex-col justify-center px-10 lg:px-16 xl:px-20 py-12 opacity-100 visible">
-        <span class="section-label font-sans text-xs font-semibold tracking-[0.35em] uppercase text-[#d4a24c] mb-6">Mission</span>
-        <h2 class="font-sans font-bold text-[clamp(24px,4vw,42px)] leading-[1.35] tracking-[-0.01em] text-white mb-6">
+        <h2 class="section-label font-sans text-xs font-semibold tracking-[0.35em] uppercase text-[#d4a24c] mb-6">Mission</h2>
+        <p class="font-sans font-bold text-[clamp(24px,4vw,42px)] leading-[1.35] tracking-[-0.01em] text-white mb-6">
           {{ missionText }}
-        </h2>
+        </p>
       </div>
 
       <div class="right-content w-full lg:w-[45%] xl:w-[42%] bg-[#12100c]/60 backdrop-blur-sm border-l border-[rgba(212,162,76,0.1)] flex flex-col justify-center px-10 lg:px-14 xl:px-16 py-12">
         <div class="right-inner opacity-100 visible">
-          <span class="section-label font-sans text-xs font-semibold tracking-[0.35em] uppercase text-[#d4a24c] mb-6 block">Vision</span>
+          <h2 class="section-label font-sans text-xs font-semibold tracking-[0.35em] uppercase text-[#d4a24c] mb-6 block">Vision</h2>
           <p class="font-sans text-[clamp(16px,2.2vw,22px)] text-[#f5f0e8]/85 leading-[1.7] mb-10">{{ visionText }}</p>
 
           <div class="space-y-5">
             <div class="flex items-center gap-4">
-              <span class="w-12 h-px bg-gradient-to-r from-[#d4a24c] to-transparent"></span>
-              <span class="font-sans text-xs font-semibold tracking-[0.3em] uppercase text-[#d4a24c]">Core Values</span>
+              <span class="w-12 h-px bg-gradient-to-r from-[#d4a24c] to-transparent" aria-hidden="true"></span>
+              <h3 class="sr-only">Core Values</h3>
+              <span class="font-sans text-xs font-semibold tracking-[0.3em] uppercase text-[#d4a24c]" aria-hidden="true">Core Values</span>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div v-for="value in values" :key="value.id" class="value-card group bg-[rgba(212,162,76,0.05)] border border-[rgba(212,162,76,0.12)] p-4 transition-all duration-400 hover:bg-[rgba(212,162,76,0.1)] hover:border-[rgba(212,162,76,0.3)] cursor-default rounded-sm opacity-100 visible">
+            <div role="region" aria-label="Core Values" class="grid grid-cols-2 gap-3">
+              <div v-for="value in values" :key="value.id" :aria-label="`${value.label}: ${value.desc}`" class="value-card group bg-[rgba(212,162,76,0.05)] border border-[rgba(212,162,76,0.12)] p-4 transition-all duration-400 hover:bg-[rgba(212,162,76,0.1)] hover:border-[rgba(212,162,76,0.3)] cursor-default rounded-sm opacity-100 visible">
                 <span class="font-sans text-sm font-bold text-[#f5f0e8] block mb-1.5 group-hover:text-[#d4a24c] transition-colors duration-300">{{ value.label }}</span>
                 <span class="font-sans text-xs text-[#f5f0e8]/50 leading-relaxed">{{ value.desc }}</span>
               </div>
@@ -126,7 +127,7 @@ const values = [
       </div>
     </div>
 
-    <div class="absolute top-1/2 right-6 lg:right-10 z-20 hidden lg:flex flex-col items-center gap-3">
+    <div class="absolute top-1/2 right-6 lg:right-10 z-20 hidden lg:flex flex-col items-center gap-3" aria-hidden="true">
       <span class="writing-vertical font-sans text-[10px] font-medium tracking-[0.25em] text-[#f5f0e8]/15 uppercase rotate-180">Mission & Vision</span>
       <div class="w-px h-16 bg-gradient-to-b from-[#d4a24c]/20 to-transparent"></div>
     </div>

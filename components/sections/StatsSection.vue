@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
+import { useAriaLive } from '~/composables/useAriaLive'
 import IconRspoSmall from '../ui/icons/IconRspoSmall.vue'
 import IconIsccSmall from '../ui/icons/IconIsccSmall.vue'
 import IconHectaresPremium from '../ui/icons/IconHectaresPremium.vue'
@@ -26,13 +27,44 @@ const stats: StatItem[] = [
 const narrativeText = `From our plantations in Kalimantan, NPI produces over 380,000 metric tons of premium crude palm oil, employing over 2,800 people across our operations.`
 
 const { $gsap, $animation } = useNuxtApp()
+const { announce } = useAriaLive()
 let cleanupFns: Array<() => void> = []
+const announcedStats = new Set<string>()
 
 onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
     $gsap.set(['.hero-content', '.stat-row', '.cert-row'], { opacity: 1 })
+    nextTick(() => {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (entry.target.classList.contains('stat-row')) {
+              const statIndex = Array.from(document.querySelectorAll('.stat-row')).indexOf(entry.target as HTMLElement)
+              if (statIndex >= 0 && statIndex < stats.length) {
+                const stat = stats[statIndex]
+                if (!announcedStats.has(stat.id)) {
+                  announcedStats.add(stat.id)
+                  announce(`${stat.displayValue} ${stat.suffix}, ${stat.label}`)
+                }
+              }
+            } else if (entry.target.classList.contains('cert-row')) {
+              if (!announcedStats.has('certifications')) {
+                announcedStats.add('certifications')
+                announce('RSPO Certified 2019, ISCC EU')
+              }
+            }
+          }
+        })
+      }, { threshold: 0.5 })
+
+      document.querySelectorAll('.stat-row, .cert-row').forEach((row) => {
+        observer.observe(row)
+      })
+
+      cleanupFns.push(() => observer.disconnect())
+    })
     return
   }
 
@@ -59,6 +91,34 @@ onMounted(() => {
       const cleanup = $animation?.hoverScale?.(row as HTMLElement, { scale: 1.02, duration: 0.3 })
       if (cleanup) cleanupFns.push(cleanup)
     })
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (entry.target.classList.contains('stat-row')) {
+            const statIndex = Array.from(document.querySelectorAll('.stat-row')).indexOf(entry.target as HTMLElement)
+            if (statIndex >= 0 && statIndex < stats.length) {
+              const stat = stats[statIndex]
+              if (!announcedStats.has(stat.id)) {
+                announcedStats.add(stat.id)
+                announce(`${stat.displayValue} ${stat.suffix}, ${stat.label}`)
+              }
+            }
+          } else if (entry.target.classList.contains('cert-row')) {
+            if (!announcedStats.has('certifications')) {
+              announcedStats.add('certifications')
+              announce('RSPO Certified 2019, ISCC EU')
+            }
+          }
+        }
+      })
+    }, { threshold: 0.5 })
+
+    document.querySelectorAll('.stat-row, .cert-row').forEach((row) => {
+      observer.observe(row)
+    })
+
+    cleanupFns.push(() => observer.disconnect())
   })
 
 })
@@ -72,9 +132,9 @@ onUnmounted(() => {
   <section id="stats" class="stats-section panel h-screen flex flex-col lg:flex-row overflow-hidden">
     <div class="hero-statement w-full lg:w-1/2 bg-[#f5f0e8] flex flex-col justify-center px-8 lg:px-24 py-16 lg:py-0 relative">
       <div class="hero-content max-w-xl">
-        <span class="section-label text-sm uppercase tracking-[0.3em] text-[#c45b28] mb-8 block">
+        <h2 class="section-label text-sm uppercase tracking-[0.3em] text-[#c45b28] mb-8 block">
           By The Numbers
-        </span>
+        </h2>
 
         <div class="revenue-hero mb-10">
           <span class="revenue-currency text-4xl lg:text-6xl font-light text-[#2c2416]">$</span>
@@ -89,38 +149,41 @@ onUnmounted(() => {
           From our <span class="text-[#c45b28] font-semibold">85,000 hectares</span> of sustainable plantations in Kalimantan, NPI produces over <span class="text-[#c45b28] font-semibold">380,000 metric tons</span> of premium crude palm oil, employing <span class="text-[#2a5c55] font-semibold">2,800+ people</span> across our operations.
         </p>
 
-        <div class="cert-row flex flex-wrap items-center gap-6 lg:gap-8">
+        <div class="cert-row flex flex-wrap items-center gap-6 lg:gap-8" role="group" aria-label="Certifications">
           <span class="text-xs uppercase tracking-widest text-[#2c2416]/40">Certifications</span>
-          <div class="w-px h-8 bg-[#2c2416]/10"></div>
-          <div class="flex items-center gap-4">
-            <IconRspoSmall class="w-10 h-10 lg:w-12 lg:h-12" />
-            <IconIsccSmall class="w-10 h-10 lg:w-12 lg:h-12" />
+          <div class="w-px h-8 bg-[#2c2416]/10" aria-hidden="true"></div>
+          <div class="flex items-center gap-4" role="group" aria-label="Certification badges">
+            <IconRspoSmall class="w-10 h-10 lg:w-12 lg:h-12" role="img" aria-label="RSPO Certified" />
+            <IconIsccSmall class="w-10 h-10 lg:w-12 lg:h-12" role="img" aria-label="ISCC EU Certified" />
           </div>
           <span class="text-sm lg:text-base text-[#2c2416]/60 hidden sm:block">RSPO Certified 2019 | ISCC EU</span>
         </div>
       </div>
     </div>
 
-    <div class="stats-column w-full lg:w-1/2 bg-[#2c2416] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0">
+    <div class="stats-column w-full lg:w-1/2 bg-[#2c2416] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0" role="group" aria-label="Statistics">
       <div
-          class="stat-row flex items-center gap-6 lg:gap-10 mb-10 lg:mb-16 pb-10 lg:pb-16 border-b border-[#f5f0e8]/10"
-          v-for="(stat, index) in stats"
-          :key="stat.id"
-          :class="{ 'border-b-0': index === stats.length - 1 }"
-        >
-          <div class="stat-icon w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0" :style="{ color: stat.accentColor }">
-            <component :is="stat.icon" />
+        class="stat-row flex items-center gap-6 lg:gap-10 mb-10 lg:mb-16 pb-10 lg:pb-16 border-b border-[#f5f0e8]/10"
+        v-for="(stat, index) in stats"
+        :key="stat.id"
+        :class="{ 'border-b-0': index === stats.length - 1 }"
+        role="group"
+        :aria-label="`${stat.label}: ${stat.displayValue} ${stat.suffix}`"
+        tabindex="0"
+      >
+        <div class="stat-icon w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0" :style="{ color: stat.accentColor }" aria-hidden="true">
+          <component :is="stat.icon" />
+        </div>
+        <div>
+          <div class="stat-value flex items-baseline gap-2 lg:gap-3">
+            <span class="text-5xl lg:text-7xl font-bold text-[#f5f0e8] tabular-nums tracking-tight">{{ stat.displayValue }}</span>
+            <span class="text-xl lg:text-2xl" :style="{ color: stat.accentColor }">{{ stat.suffix }}</span>
           </div>
-          <div>
-            <div class="stat-value flex items-baseline gap-2 lg:gap-3">
-              <span class="text-5xl lg:text-7xl font-bold text-[#f5f0e8] tabular-nums tracking-tight">{{ stat.displayValue }}</span>
-              <span class="text-xl lg:text-2xl" :style="{ color: stat.accentColor }">{{ stat.suffix }}</span>
-            </div>
-            <div class="stat-label text-xs lg:text-sm uppercase tracking-widest text-[#f5f0e8]/40 mt-3 lg:mt-4">
-              {{ stat.label }}
-            </div>
+          <div class="stat-label text-xs lg:text-sm uppercase tracking-widest text-[#f5f0e8]/40 mt-3 lg:mt-4">
+            {{ stat.label }}
           </div>
         </div>
+      </div>
     </div>
   </section>
 </template>
@@ -161,6 +224,12 @@ onUnmounted(() => {
 .stat-icon :deep(svg) {
   width: 100%;
   height: 100%;
+}
+
+.stat-row:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 @media (max-width: 1024px) {

@@ -162,28 +162,28 @@ onUnmounted(() => {
 
         <div class="left-content">
           <div class="product-visual">
-            <svg viewBox="0 0 64 64" class="tank-icon" fill="none">
-              <rect x="12" y="20" width="40" height="38" rx="2" stroke="currentColor" stroke-width="2.5"/>
-              <ellipse cx="32" cy="20" rx="20" ry="6" stroke="currentColor" stroke-width="2.5"/>
-              <rect x="28" y="26" width="8" height="24" rx="1" stroke="currentColor" stroke-width="1.5"/>
-              <rect x="30" y="32" width="4" height="16" fill="currentColor" opacity="0.3"/>
-              <path d="M12 12H4V16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              <path d="M52 52H60V48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-              <circle cx="48" cy="14" r="5" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M48 14L50 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M4 58H60" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <svg viewBox="0 0 64 64" class="tank-icon" fill="none" aria-hidden="true">
+              <rect x="12" y="20" width="40" height="38" rx="2" stroke="currentColor" stroke-width="2.5" />
+              <ellipse cx="32" cy="20" rx="20" ry="6" stroke="currentColor" stroke-width="2.5" />
+              <rect x="28" y="26" width="8" height="24" rx="1" stroke="currentColor" stroke-width="1.5" />
+              <rect x="30" y="32" width="4" height="16" fill="currentColor" opacity="0.3" />
+              <path d="M12 12H4V16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <path d="M52 52H60V48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+              <circle cx="48" cy="14" r="5" stroke="currentColor" stroke-width="1.5" />
+              <path d="M48 14L50 11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M4 58H60" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
             </svg>
           </div>
 
           <div class="capacity-badge">
             <div class="capacity-icon">
-              <svg viewBox="0 0 64 64" fill="none">
-                <rect x="8" y="36" width="10" height="20" rx="1" stroke="currentColor" stroke-width="2"/>
-                <rect x="22" y="28" width="10" height="28" rx="1" stroke="currentColor" stroke-width="2"/>
-                <rect x="36" y="16" width="10" height="40" rx="1" stroke="currentColor" stroke-width="2"/>
-                <rect x="50" y="8" width="10" height="48" rx="1" stroke="currentColor" stroke-width="2"/>
-                <path d="M4 56L20 44L36 32L52 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M48 16L52 16L52 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <rect x="8" y="36" width="10" height="20" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="22" y="28" width="10" height="28" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="36" y="16" width="10" height="40" rx="1" stroke="currentColor" stroke-width="2" />
+                <rect x="50" y="8" width="10" height="48" rx="1" stroke="currentColor" stroke-width="2" />
+                <path d="M4 56L20 44L36 32L52 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M48 16L52 16L52 20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
               </svg>
             </div>
             <div class="capacity-value">
@@ -194,24 +194,24 @@ onUnmounted(() => {
           </div>
 
           <div class="cert-row">
-            <a href="#" class="cert-badge" aria-label="RSPO Certified">
-              <svg viewBox="0 0 64 64" fill="none">
-                <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2.5"/>
-                <path d="M32 12C32 12 24 20 20 28C20 28 24 24 32 24C40 24 44 28 44 28C40 20 32 12 32 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M32 24C32 24 26 30 26 36C26 36 32 36 32 36C32 36 38 36 38 36C38 30 32 24 32 24Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M20 46H44" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <path d="M22 50H42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <a href="#" class="cert-badge" aria-label="RSPO Certified - Roundtable on Sustainable Palm Oil certification">
+              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <circle cx="32" cy="32" r="28" stroke="currentColor" stroke-width="2.5" />
+                <path d="M32 12C32 12 24 20 20 28C20 28 24 24 32 24C40 24 44 28 44 28C40 20 32 12 32 12Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M32 24C32 24 26 30 26 36C26 36 32 36 32 36C32 36 38 36 38 36C38 30 32 24 32 24Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M20 46H44" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M22 50H42" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
               </svg>
               <span class="cert-text">
                 <span class="cert-name">RSPO</span>
                 <span class="cert-status">Certified</span>
               </span>
             </a>
-            <a href="#" class="cert-badge" aria-label="ISCC EU Certified">
-              <svg viewBox="0 0 64 64" fill="none">
-                <path d="M32 8L8 16V32C8 46 20 56 32 58C44 56 56 46 56 32V16L32 8Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
-                <path d="M32 20C32 20 22 28 22 36C22 42 28 46 32 46C36 46 42 42 42 36C42 28 32 20 32 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                <ellipse cx="32" cy="36" rx="12" ry="8" stroke="currentColor" stroke-width="1.5"/>
+            <a href="#" class="cert-badge" aria-label="ISCC EU Certified - International Sustainability and Carbon Certification">
+              <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                <path d="M32 8L8 16V32C8 46 20 56 32 58C44 56 56 46 56 32V16L32 8Z" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" />
+                <path d="M32 20C32 20 22 28 22 36C22 42 28 46 32 46C36 46 42 42 42 36C42 28 32 20 32 20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <ellipse cx="32" cy="36" rx="12" ry="8" stroke="currentColor" stroke-width="1.5" />
               </svg>
               <span class="cert-text">
                 <span class="cert-name">ISCC EU</span>
@@ -243,6 +243,9 @@ onUnmounted(() => {
                 v-for="spec in specifications"
                 :key="spec.parameter"
                 class="spec-card"
+                tabindex="0"
+                :aria-label="`${spec.parameter}: ${spec.value} ${spec.unit}`"
+                role="article"
               >
                 <div class="spec-icon">
                   <img :src="getIconPath(spec.icon)" :alt="spec.parameter" />
@@ -265,6 +268,9 @@ onUnmounted(() => {
                 v-for="feature in features"
                 :key="feature.id"
                 class="feature-card"
+                tabindex="0"
+                :aria-label="`${feature.title}: ${feature.description}`"
+                role="article"
               >
                 <div class="feature-icon">
                   <img :src="getIconPath(feature.icon)" :alt="feature.title" />
@@ -440,6 +446,13 @@ onUnmounted(() => {
   background: rgba(245, 240, 232, 0.08);
   border-color: rgba(230, 184, 77, 0.3);
   transform: translateX(4px);
+}
+
+.cert-badge:focus-visible {
+  outline: 3px solid #d4a24c;
+  outline-offset: 2px;
+  background: rgba(245, 240, 232, 0.08);
+  border-color: rgba(230, 184, 77, 0.4);
 }
 
 .cert-badge svg {
@@ -624,9 +637,16 @@ onUnmounted(() => {
   background: #2c2416;
   border-radius: 8px;
   transition: all 0.3s ease;
+  cursor: default;
 }
 
 .feature-card:hover {
+  background: #3a3025;
+}
+
+.feature-card:focus-visible {
+  outline: 3px solid #d4a24c;
+  outline-offset: 2px;
   background: #3a3025;
 }
 

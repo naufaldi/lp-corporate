@@ -1,10 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useNuxtApp } from '#app'
 import FlowParticles from '~/components/ui/FlowParticles.vue'
+import { useKeyboardNavigation } from '~/composables/useKeyboardNavigation'
 
 const { $gsap, $animation } = useNuxtApp()
+const { handleEnterOrSpace } = useKeyboardNavigation()
 
+const ctaButtonRef = ref<HTMLButtonElement | null>(null)
 let bgParallaxTween: gsap.core.Tween | null = null
 
 const scrollToStats = () => {
@@ -38,6 +41,11 @@ const onImageError = (e: Event) => {
 let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
+  if (ctaButtonRef.value) {
+    const cleanupKeyboard = handleEnterOrSpace(ctaButtonRef.value, scrollToStats)
+    if (cleanupKeyboard) cleanupFns.push(cleanupKeyboard)
+  }
+
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
@@ -134,15 +142,17 @@ onUnmounted(() => {
       <div class="overlay-noise"></div>
       <div class="overlay-gradient"></div>
       <div class="overlay-vignette"></div>
-      <FlowParticles 
-        :count="6" 
-        color="#e6b84d" 
-        speed="medium" 
-        direction="right"
-        size="small"
-        :opacity="0.3"
-      />
-      <div class="floating-particles">
+      <div aria-hidden="true">
+        <FlowParticles 
+          :count="6" 
+          color="#e6b84d" 
+          speed="medium" 
+          direction="right"
+          size="small"
+          :opacity="0.3"
+        />
+      </div>
+      <div class="floating-particles" aria-hidden="true">
         <div class="particle particle-1 floating-particle"></div>
         <div class="particle particle-2 floating-particle"></div>
         <div class="particle particle-3 floating-particle"></div>
@@ -171,10 +181,15 @@ onUnmounted(() => {
         </p>
 
         <div class="hero-cta-group">
-          <button class="hero-cta" @click="scrollToStats">
+          <button 
+            ref="ctaButtonRef"
+            class="hero-cta" 
+            aria-label="Explore Our Story"
+            @click="scrollToStats"
+          >
             <span>Explore Our Story</span>
-            <svg class="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
+            <svg class="cta-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </button>
 
@@ -198,7 +213,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="scroll-indicator">
+    <div class="scroll-indicator" aria-hidden="true">
       <div class="scroll-line">
         <div class="scroll-progress"></div>
       </div>
@@ -394,6 +409,12 @@ onUnmounted(() => {
 
 .hero-cta:hover {
   box-shadow: 0 12px 32px rgba(196, 91, 40, 0.4);
+}
+
+.hero-cta:focus-visible {
+  outline: 3px solid #ffffff;
+  outline-offset: 3px;
+  box-shadow: 0 0 0 1px rgba(196, 91, 40, 0.5), 0 12px 32px rgba(196, 91, 40, 0.4);
 }
 
 .cta-icon {

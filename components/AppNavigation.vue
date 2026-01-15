@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { inject, ref, onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
+import SkipLink from '~/components/ui/SkipLink.vue'
+import { useFocusManagement } from '~/composables/useFocusManagement'
+import { useKeyboardNavigation } from '~/composables/useKeyboardNavigation'
 
 interface NavItem {
   label: string
@@ -24,6 +27,10 @@ const { $animation } = useNuxtApp()
 const injectedScrollToSection = inject<((href: string) => void) | null>('scrollToSection', null)
 let cleanupFns: Array<() => void> = []
 
+const { trapFocus, restoreFocus } = useFocusManagement()
+const { handleEscape } = useKeyboardNavigation()
+let focusTrapCleanup: (() => void) | null = null
+
 const checkScroll = () => {
   isScrolled.value = window.scrollY > 50
 }
@@ -34,10 +41,27 @@ const checkMobile = () => {
 
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
+  if (isMobileMenuOpen.value) {
+    const mobileMenu = document.querySelector('.app-nav__mobile') as HTMLElement
+    if (mobileMenu) {
+      focusTrapCleanup = trapFocus(mobileMenu)
+    }
+  } else {
+    if (focusTrapCleanup) {
+      focusTrapCleanup()
+      focusTrapCleanup = null
+    }
+    restoreFocus()
+  }
 }
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
+  if (focusTrapCleanup) {
+    focusTrapCleanup()
+    focusTrapCleanup = null
+  }
+  restoreFocus()
 }
 
 const scrollToSection = (href: string) => {
@@ -57,6 +81,13 @@ onMounted(() => {
   checkMobile()
   window.addEventListener('scroll', checkScroll)
   window.addEventListener('resize', checkMobile)
+
+  const escapeCleanup = handleEscape(() => {
+    if (isMobileMenuOpen.value) {
+      closeMobileMenu()
+    }
+  })
+  cleanupFns.push(escapeCleanup)
 
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
@@ -80,6 +111,9 @@ onUnmounted(() => {
   window.removeEventListener('scroll', checkScroll)
   window.removeEventListener('resize', checkMobile)
   cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
+  if (focusTrapCleanup) {
+    focusTrapCleanup()
+  }
 })
 </script>
 
@@ -90,12 +124,19 @@ onUnmounted(() => {
       { 'app-nav--scrolled': isScrolled },
       { 'app-nav--mobile-open': isMobileMenuOpen }
     ]"
+    role="navigation"
+    aria-label="Main navigation"
   >
+    <SkipLink />
     <div class="app-nav__container">
       <!-- Logo -->
-      <div class="app-nav__logo" @click="scrollToSection('#hero')">
+      <button
+        class="app-nav__logo"
+        @click="scrollToSection('#hero')"
+        aria-label="Go to homepage"
+      >
         <NpiLogo variant="light" size="sm" />
-      </div>
+      </button>
 
       <!-- Desktop Navigation -->
       <div class="app-nav__desktop">
@@ -108,6 +149,7 @@ onUnmounted(() => {
             <button
               class="app-nav__link"
               @click="scrollToSection(item.href)"
+              :aria-label="`Navigate to ${item.label} section`"
             >
               <span class="app-nav__label">{{ item.label }}</span>
               <span class="app-nav__underline" aria-hidden="true"></span>
@@ -121,6 +163,8 @@ onUnmounted(() => {
         class="app-nav__mobile-toggle"
         @click="toggleMobileMenu"
         :aria-label="isMobileMenuOpen ? 'Close menu' : 'Open menu'"
+        :aria-expanded="isMobileMenuOpen"
+        aria-controls="mobile-menu"
       >
         <span :class="['hamburger', { 'hamburger--open': isMobileMenuOpen }]">
           <span></span>
@@ -131,7 +175,13 @@ onUnmounted(() => {
     </div>
 
     <!-- Mobile Menu -->
-    <div class="app-nav__mobile" v-if="isMobileMenuOpen">
+    <div
+      id="mobile-menu"
+      class="app-nav__mobile"
+      v-if="isMobileMenuOpen"
+      role="menu"
+      aria-label="Mobile navigation menu"
+    >
       <ul class="app-nav__mobile-list">
         <li
           v-for="item in navItems"
@@ -141,6 +191,8 @@ onUnmounted(() => {
           <button
             class="app-nav__mobile-link"
             @click="scrollToSection(item.href)"
+            role="menuitem"
+            :aria-label="`Navigate to ${item.label} section`"
           >
             {{ item.label }}
           </button>
@@ -178,12 +230,21 @@ onUnmounted(() => {
 }
 
 .app-nav__logo {
+  background: none;
+  border: none;
+  padding: 0;
   cursor: pointer;
   transition: transform 0.3s ease;
 }
 
 .app-nav__logo:hover {
   transform: scale(1.05);
+}
+
+.app-nav__logo:focus-visible {
+  outline: 3px solid #d4a24c;
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 /* Desktop Navigation */
@@ -223,6 +284,12 @@ onUnmounted(() => {
   transition: color 0.3s ease;
 }
 
+.app-nav__link:focus-visible {
+  outline: 3px solid #d4a24c;
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
 .app-nav__underline {
   position: absolute;
   bottom: 0;
@@ -243,6 +310,12 @@ onUnmounted(() => {
   border: none;
   cursor: pointer;
   padding: 0.5rem;
+}
+
+.app-nav__mobile-toggle:focus-visible {
+  outline: 3px solid #d4a24c;
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 @media (min-width: 768px) {
@@ -330,6 +403,12 @@ onUnmounted(() => {
   cursor: pointer;
   padding: 0.5rem 0;
   transition: color 0.3s ease;
+}
+
+.app-nav__mobile-link:focus-visible {
+  outline: 3px solid #d4a24c;
+  outline-offset: 4px;
+  border-radius: 2px;
 }
 
 .app-nav__mobile-link:hover {

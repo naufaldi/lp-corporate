@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
+import { useAriaLive } from '~/composables/useAriaLive'
+import { useFocusManagement } from '~/composables/useFocusManagement'
+import { focusElement } from '~/utils/accessibility'
 
 interface ContactInfo {
   id: string
@@ -21,6 +24,12 @@ interface Office {
 
 const { $gsap, $animation } = useNuxtApp()
 let cleanupFns: Array<() => void> = []
+
+const { announce, announceAssertive } = useAriaLive()
+const { returnFocus } = useFocusManagement()
+
+const formErrors = ref<Record<string, string>>({})
+const successMessageRef = ref<HTMLElement | null>(null)
 
 const contactInfo: ContactInfo[] = [
   {
@@ -76,11 +85,85 @@ const formData = ref({
 const submitted = ref(false)
 const submitting = ref(false)
 
+const validateForm = (): boolean => {
+  formErrors.value = {}
+  let isValid = true
+
+  if (!formData.value.name.trim()) {
+    formErrors.value.name = 'Name is required'
+    isValid = false
+  }
+
+  if (!formData.value.email.trim()) {
+    formErrors.value.email = 'Email is required'
+    isValid = false
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.value.email)) {
+    formErrors.value.email = 'Please enter a valid email address'
+    isValid = false
+  }
+
+  if (!formData.value.message.trim()) {
+    formErrors.value.message = 'Requirements are required'
+    isValid = false
+  }
+
+  return isValid
+}
+
+const clearFieldError = (field: string) => {
+  if (formErrors.value[field]) {
+    delete formErrors.value[field]
+  }
+}
+
 const submitForm = async () => {
+  if (!validateForm()) {
+    announceAssertive('Please correct the errors in the form')
+    const firstErrorField = document.querySelector<HTMLElement>('[aria-invalid="true"]')
+    if (firstErrorField) {
+      focusElement(firstErrorField)
+    }
+    return
+  }
+
   submitting.value = true
-  await new Promise(resolve => setTimeout(resolve, 1500))
-  submitted.value = true
-  submitting.value = false
+  announce('Processing your inquiry...', 'polite')
+
+  try {
+    await new Promise(resolve => setTimeout(resolve, 1500))
+    submitted.value = true
+    submitting.value = false
+    formErrors.value = {}
+    
+    announce('Your inquiry has been submitted successfully. Our trade team will contact you within 24-48 hours.', 'polite')
+    
+    nextTick(() => {
+      if (successMessageRef.value) {
+        focusElement(successMessageRef.value)
+      }
+    })
+  } catch (error) {
+    submitting.value = false
+    announceAssertive('An error occurred while submitting your inquiry. Please try again.')
+  }
+}
+
+const resetForm = () => {
+  submitted.value = false
+  formData.value = {
+    name: '',
+    email: '',
+    company: '',
+    message: ''
+  }
+  formErrors.value = {}
+  
+  nextTick(() => {
+    const firstInput = document.querySelector<HTMLElement>('#name')
+    if (firstInput) {
+      focusElement(firstInput)
+    }
+  })
 }
 
 onMounted(() => {
@@ -230,6 +313,7 @@ onUnmounted(() => {
                 v-for="info in contactInfo"
                 :key="info.id"
                 :href="info.link"
+                :aria-label="`${info.label}: ${info.value}`"
                 class="info-card"
               >
                 <div class="info-icon">
@@ -265,6 +349,7 @@ onUnmounted(() => {
               <div
                 v-for="office in offices"
                 :key="office.id"
+                :aria-label="`${office.name}, ${office.role}. ${office.address}`"
                 class="office-card"
               >
                 <div class="office-header">
@@ -297,8 +382,22 @@ onUnmounted(() => {
                     type="text"
                     placeholder="Full name"
                     class="form-input"
+                    :class="{ 'form-input-error': formErrors.name }"
+                    :aria-required="true"
+                    :aria-invalid="!!formErrors.name"
+                    :aria-describedby="formErrors.name ? 'name-error' : undefined"
                     required
+                    @blur="clearFieldError('name')"
                   />
+                  <span
+                    v-if="formErrors.name"
+                    id="name-error"
+                    class="form-error"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    {{ formErrors.name }}
+                  </span>
                 </div>
                 <div class="form-group">
                   <label for="email" class="form-label-input">Email Address *</label>
@@ -308,8 +407,22 @@ onUnmounted(() => {
                     type="email"
                     placeholder="Email"
                     class="form-input"
+                    :class="{ 'form-input-error': formErrors.email }"
+                    :aria-required="true"
+                    :aria-invalid="!!formErrors.email"
+                    :aria-describedby="formErrors.email ? 'email-error' : undefined"
                     required
+                    @blur="clearFieldError('email')"
                   />
+                  <span
+                    v-if="formErrors.email"
+                    id="email-error"
+                    class="form-error"
+                    role="alert"
+                    aria-live="polite"
+                  >
+                    {{ formErrors.email }}
+                  </span>
                 </div>
               </div>
 
@@ -321,6 +434,7 @@ onUnmounted(() => {
                   type="text"
                   placeholder="Company name"
                   class="form-input"
+                  aria-required="false"
                 />
               </div>
 
@@ -332,37 +446,65 @@ onUnmounted(() => {
                   rows="4"
                   placeholder="Describe your palm oil requirements..."
                   class="form-textarea"
+                  :class="{ 'form-input-error': formErrors.message }"
+                  :aria-required="true"
+                  :aria-invalid="!!formErrors.message"
+                  :aria-describedby="formErrors.message ? 'message-error' : undefined"
                   required
+                  @blur="clearFieldError('message')"
                 ></textarea>
+                <span
+                  v-if="formErrors.message"
+                  id="message-error"
+                  class="form-error"
+                  role="alert"
+                  aria-live="polite"
+                >
+                  {{ formErrors.message }}
+                </span>
               </div>
 
               <button
                 class="submit-btn"
-                :disabled="!formData.name || !formData.email || !formData.message || submitting"
+                :disabled="submitting"
+                :aria-label="submitting ? 'Processing your inquiry' : 'Submit contact form'"
                 @click="submitForm"
               >
                 <span v-if="!submitting">Request Callback</span>
                 <span v-else class="submitting">
-                  <svg class="spinner" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 70"/>
+                  <svg class="spinner" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" fill="none" stroke-dasharray="30 70" />
                   </svg>
                   Processing...
                 </span>
               </button>
             </div>
 
-            <div v-else class="success-message">
-              <div class="success-icon">
+            <div
+              v-else
+              ref="successMessageRef"
+              class="success-message"
+              tabindex="-1"
+              role="status"
+              aria-live="polite"
+            >
+              <div class="success-icon" aria-hidden="true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
+                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                  <polyline points="22 4 12 14.01 9 11.01" />
                 </svg>
               </div>
               <h4 class="success-title">Inquiry Submitted</h4>
               <p class="success-desc">
                 Thank you. Our trade team will contact you within 24-48 hours to discuss your palm oil requirements.
               </p>
-              <button class="reset-btn" @click="submitted = false">Submit Another</button>
+              <button
+                class="reset-btn"
+                aria-label="Submit another inquiry"
+                @click="resetForm"
+              >
+                Submit Another
+              </button>
             </div>
           </div>
         </div>
@@ -783,6 +925,24 @@ onUnmounted(() => {
   border-color: #c45b28;
   background: #ffffff;
   box-shadow: 0 0 0 3px rgba(196, 91, 40, 0.1);
+}
+
+.form-input-error {
+  border-color: #c45b28;
+  background: #fff5f0;
+}
+
+.form-input-error:focus {
+  border-color: #c45b28;
+  box-shadow: 0 0 0 3px rgba(196, 91, 40, 0.2);
+}
+
+.form-error {
+  display: block;
+  font-size: 0.8rem;
+  color: #c45b28;
+  margin-top: 0.375rem;
+  font-weight: 500;
 }
 
 .form-textarea {

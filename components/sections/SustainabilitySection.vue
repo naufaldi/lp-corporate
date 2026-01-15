@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
+import { useKeyboardNavigation } from '~/composables/useKeyboardNavigation'
+import { useFocusManagement } from '~/composables/useFocusManagement'
+import { announceToScreenReader } from '~/utils/accessibility'
 
 interface Milestone {
   year: string
@@ -10,10 +13,14 @@ interface Milestone {
 }
 
 const { $gsap, $ScrollTrigger, $animation } = useNuxtApp()
+const { handleArrowKeys, handleEnterOrSpace } = useKeyboardNavigation()
+const { saveFocus, returnFocus } = useFocusManagement()
 
 const activeNode = ref<number | null>(null)
 const expandedNodes = ref<number[]>([])
 const visibleNodes = ref<number[]>([])
+const milestoneRefs = ref<(HTMLElement | null)[]>([])
+const focusedMilestoneIndex = ref<number | null>(null)
 
 const cleanupFns: Array<() => void> = []
 
@@ -104,12 +111,54 @@ const getNodeStyle = (index: number): Record<string, string> => {
 }
 
 const toggleMilestone = (index: number) => {
-  if (expandedNodes.value.includes(index)) {
+  const wasExpanded = expandedNodes.value.includes(index)
+  const milestoneNode = milestoneRefs.value[index]
+  
+  if (wasExpanded) {
     expandedNodes.value = expandedNodes.value.filter(i => i !== index)
+    activeNode.value = activeNode.value === index ? null : index
+    if (milestoneNode) {
+      saveFocus()
+      nextTick(() => {
+        returnFocus(milestoneNode)
+        announceToScreenReader(`${milestones[index].year} ${milestones[index].title} collapsed`)
+      })
+    }
   } else {
     expandedNodes.value.push(index)
+    activeNode.value = index
+    if (milestoneNode) {
+      saveFocus()
+      nextTick(() => {
+        const detailsElement = milestoneNode.querySelector(`#milestone-details-${index}`) as HTMLElement
+        if (detailsElement) {
+          detailsElement.focus()
+          detailsElement.setAttribute('tabindex', '-1')
+        }
+        announceToScreenReader(`${milestones[index].year} ${milestones[index].title} expanded. ${milestones[index].details.length} details available`)
+      })
+    }
   }
-  activeNode.value = activeNode.value === index ? null : index
+}
+
+const focusMilestone = (index: number) => {
+  const node = milestoneRefs.value[index]
+  if (node) {
+    node.focus()
+    focusedMilestoneIndex.value = index
+  }
+}
+
+const navigateToPreviousMilestone = () => {
+  const currentIndex = focusedMilestoneIndex.value ?? 0
+  const previousIndex = currentIndex === 0 ? milestones.length - 1 : currentIndex - 1
+  focusMilestone(previousIndex)
+}
+
+const navigateToNextMilestone = () => {
+  const currentIndex = focusedMilestoneIndex.value ?? 0
+  const nextIndex = (currentIndex + 1) % milestones.length
+  focusMilestone(nextIndex)
 }
 
 const scrollToMission = () => {
@@ -253,6 +302,24 @@ onMounted(() => {
     height: '100%',
     duration: 1
   })
+
+  nextTick(() => {
+    const timelineContainer = document.querySelector('.journey-timeline') as HTMLElement
+    if (timelineContainer) {
+      const cleanupArrowKeys = handleArrowKeys(timelineContainer, {
+        onArrowUp: navigateToPreviousMilestone,
+        onArrowDown: navigateToNextMilestone
+      })
+      cleanupFns.push(cleanupArrowKeys)
+    }
+
+    milestoneRefs.value.forEach((node, index) => {
+      if (node) {
+        const cleanupEnterSpace = handleEnterOrSpace(node, () => toggleMilestone(index))
+        cleanupFns.push(cleanupEnterSpace)
+      }
+    })
+  })
 })
 
 onUnmounted(() => {
@@ -303,10 +370,14 @@ onUnmounted(() => {
         </div>
 
         <div class="journey-ctas">
-          <button class="cta-primary" @click="scrollToMission">
+          <button 
+            class="cta-primary" 
+            @click="scrollToMission"
+            aria-label="Navigate to mission section to learn about our sustainability definition"
+          >
             Define Our Sustainability
-            <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7"/>
+            <svg class="cta-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M5 12h14M12 5l7 7-7 7" />
             </svg>
           </button>
         </div>
@@ -317,14 +388,20 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="journey-timeline">
-        <div class="timeline-track">
+      <div 
+        class="journey-timeline"
+        role="region"
+        aria-label="Sustainability timeline"
+      >
+        <div class="timeline-track" aria-hidden="true">
           <div class="timeline-progress"></div>
         </div>
 
         <div
           v-for="(milestone, index) in milestones"
           :key="milestone.year"
+          :ref="el => milestoneRefs[index] = el as HTMLElement"
+          :id="`milestone-${index}`"
           class="milestone-node"
           :class="[
             `node-${index}`,
@@ -332,7 +409,13 @@ onUnmounted(() => {
             { 'is-active': activeNode === index }
           ]"
           :style="getNodeStyle(index)"
+          role="button"
+          :tabindex="0"
+          :aria-expanded="expandedNodes.includes(index)"
+          :aria-controls="`milestone-details-${index}`"
+          :aria-label="`${milestone.year}: ${milestone.title}. ${milestone.description}`"
           @click="toggleMilestone(index)"
+          @focus="focusedMilestoneIndex = index"
         >
           <div class="node-marker">
             <div class="marker-ring"></div>
@@ -345,11 +428,16 @@ onUnmounted(() => {
             <p class="node-description">{{ milestone.description }}</p>
 
             <transition name="expand">
-              <div v-if="expandedNodes.includes(index)" class="node-details">
-                <ul class="details-list">
-                  <li v-for="detail in milestone.details" :key="detail">
-                    <svg class="check-icon" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              <div 
+                v-if="expandedNodes.includes(index)" 
+                :id="`milestone-details-${index}`"
+                class="node-details"
+                tabindex="-1"
+              >
+                <ul class="details-list" role="list">
+                  <li v-for="detail in milestone.details" :key="detail" role="listitem">
+                    <svg class="check-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                     </svg>
                     {{ detail }}
                   </li>
@@ -630,9 +718,17 @@ onUnmounted(() => {
   position: absolute;
   cursor: pointer;
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
 }
 
 .milestone-node:hover {
+  transform: scale(1.05);
+}
+
+.milestone-node:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
   transform: scale(1.05);
 }
 
@@ -753,6 +849,16 @@ onUnmounted(() => {
 .expand-enter-to,
 .expand-leave-from {
   max-height: 200px;
+}
+
+.node-details {
+  outline: none;
+}
+
+.node-details:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 4px;
+  border-radius: 4px;
 }
 
 .details-list {

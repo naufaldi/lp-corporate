@@ -34,7 +34,7 @@ onMounted(() => {
 <template>
   <div class="main-container">
     <AppNavigation />
-    <main>
+    <main id="main-content" role="main">
       <HeroSection />
       <StatsSection />
       <SustainabilitySection />
