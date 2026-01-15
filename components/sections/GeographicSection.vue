@@ -3,7 +3,7 @@ import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 import asiaMapUrl from '~/assets/images/asiaLow.svg?url'
 
-const { $gsap } = useNuxtApp()
+const { $gsap, $animation } = useNuxtApp()
 let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
@@ -14,54 +14,37 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline({
-    scrollTrigger: {
-      trigger: '#geographic',
-      start: 'top 65%'
-    }
-  })
-
-  tl.set('.geo-label', { opacity: 0, y: 30 })
-  tl.set('.geo-title', { opacity: 0, y: 40 })
-  tl.set('.geo-card', { opacity: 0, y: 50, scale: 0.95 })
-  tl.set('.market-item', { opacity: 0, x: -20 })
-  tl.set('.singapore-card', { opacity: 0, x: 100 })
-
-  tl.to('.geo-label', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.geo-label', {
+    trigger: '#geographic',
     duration: 0.6,
-    ease: 'power3.out'
+    y: 30
   })
-  tl.to('.geo-title', {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out'
-  }, '-=0.3')
 
-  tl.to('.geo-card', {
-    opacity: 1,
-    y: 0,
-    scale: 1,
+  $animation?.batchReveal?.('.geo-title', {
+    trigger: '#geographic',
+    duration: 0.8,
+    y: 40
+  })
+
+  $animation?.batchReveal?.('.geo-card', {
+    trigger: '#geographic',
     duration: 0.6,
     stagger: 0.12,
-    ease: 'power3.out'
-  }, '+=0.1')
+    y: 50
+  })
 
-  tl.to('.market-item', {
-    opacity: 1,
-    x: 0,
+  $animation?.batchReveal?.('.market-item', {
+    trigger: '#geographic',
     duration: 0.5,
     stagger: 0.06,
-    ease: 'power2.out'
-  }, '+=0.1')
-  tl.to('.singapore-card', {
-    opacity: 1,
-    x: 0,
+    y: 20
+  })
+
+  $animation?.batchReveal?.('.singapore-card', {
+    trigger: '#geographic',
     duration: 0.8,
-    ease: 'power3.out'
-  }, '-=0.3')
+    y: 30
+  })
 
   $gsap.to('.map-layer', {
     scrollTrigger: {
@@ -88,20 +71,8 @@ onMounted(() => {
   )
 
   document.querySelectorAll('.geo-card').forEach((card) => {
-    const el = card as HTMLElement
-    const onEnter = () => {
-      if (shouldReduceMotion) return
-      $gsap.to(el, { scale: 1.02, duration: 0.3, ease: 'power2.out' })
-    }
-    const onLeave = () => {
-      $gsap.to(el, { scale: 1, duration: 0.3, ease: 'power2.out' })
-    }
-    el.addEventListener('mouseenter', onEnter)
-    el.addEventListener('mouseleave', onLeave)
-    cleanupFns.push(() => {
-      el.removeEventListener('mouseenter', onEnter)
-      el.removeEventListener('mouseleave', onLeave)
-    })
+    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
   $gsap.to('.singapore-card', {
@@ -154,26 +125,26 @@ const geographicData = {
         <div class="map-layer absolute">
           <div class="map-bg absolute inset-0 bg-no-repeat" :style="{ backgroundImage: `url(${asiaMapUrl})` }"></div>
           <svg class="map-overlay absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 900 500" preserveAspectRatio="xMidYMid slice">
-          <defs>
-            <linearGradient id="indonesiaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" style="stop-color:#2a5c55;stop-opacity:1" />
-              <stop offset="100%" style="stop-color:#1a3d35;stop-opacity:1" />
-            </linearGradient>
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-            <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
-              <feMerge>
-                <feMergeNode in="coloredBlur"/>
-                <feMergeNode in="SourceGraphic"/>
-              </feMerge>
-            </filter>
-          </defs>
+            <defs>
+              <linearGradient id="indonesiaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" style="stop-color:#2a5c55;stop-opacity:1" />
+                <stop offset="100%" style="stop-color:#1a3d35;stop-opacity:1" />
+              </linearGradient>
+              <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+              <filter id="strongGlow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur stdDeviation="6" result="coloredBlur" />
+                <feMerge>
+                  <feMergeNode in="coloredBlur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
           <g class="land-dim">
             <path d="M619.87,393.72L620.37,393.57L620.48,394.41L622.67,393.93L624.99,394.01L626.68,394.1L628.6,392.03L630.7,390.05L632.47,388.15L633,389.2L633.38,391.64L631.95,391.65L631.72,393.65L632.22,394.07L630.95,394.67L630.94,395.92L630.12,397.18L630.05,398.39L629.48,399.03L621.06,397.51L619.98,394.43z" class="land"/>
             <path d="M646.88,356.9L649.74,358.2L651.85,357.74L652.44,356.19L654.65,355.67L656.23,354.62L656.79,351.83L659.15,351.15L659.59,349.9L660.92,350.84L661.76,350.95L663.32,350.98L665.44,351.72L666.29,352.14L668.32,351.02L669.27,351.69L670.17,350.09L671.85,350.16L672.28,349.64L672.58,348.21L673.79,346.98L675.3,347.78L675,348.87L675.85,349.04L675.58,351.99L676.69,353.14L677.67,352.4L678.92,352.06L680.66,350.49L682.59,350.75L685.49,350.75L685.99,351.76L684.35,352.15L682.93,352.8L679.71,353.2L676.7,353.93L675.06,355.44L675.72,356.9L676.05,358.6L674.65,360.03L674.77,361.33L674,362.55L671.33,362.44L672.43,364.66L670.65,365.51L669.46,367.51L669.61,369.49L668.51,370.41L667.48,370.11L665.33,370.54L665.03,371.45L662.94,371.45L661.38,373.29L661.28,376.04L657.63,377.37L655.68,377.09L655.11,377.79L653.44,377.39L650.63,377.87L645.94,376.23L648.48,373.3L648.25,371.2L646.13,370.65L645.91,368.56L644.99,365.92L646.19,364.09L644.97,363.6L645.74,361.15z" class="land"/>

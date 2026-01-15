@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { inject, ref, onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 
 interface NavItem {
@@ -21,6 +21,7 @@ const isMobileMenuOpen = ref(false)
 const isMobile = ref(false)
 
 const { $animation } = useNuxtApp()
+const injectedScrollToSection = inject<((href: string) => void) | null>('scrollToSection', null)
 let cleanupFns: Array<() => void> = []
 
 const checkScroll = () => {
@@ -41,6 +42,10 @@ const closeMobileMenu = () => {
 
 const scrollToSection = (href: string) => {
   closeMobileMenu()
+  if (injectedScrollToSection) {
+    injectedScrollToSection(href)
+    return
+  }
   const element = document.querySelector(href)
   if (element) {
     element.scrollIntoView({ behavior: 'smooth' })
@@ -59,11 +64,14 @@ onMounted(() => {
     document.querySelectorAll('.app-nav__link').forEach((link) => {
       const cleanupHover = $animation?.hoverScale?.(link as HTMLElement, { scale: 1.05, duration: 0.2 })
       if (cleanupHover) cleanupFns.push(cleanupHover)
-    })
-
-    document.querySelectorAll('.app-nav__link::after').forEach((underline) => {
-      const cleanupUnderline = $animation?.underlineExpand?.(underline as HTMLElement, { duration: 0.25 })
-      if (cleanupUnderline) cleanupFns.push(cleanupUnderline)
+      const underline = (link as HTMLElement).querySelector('.app-nav__underline')
+      if (underline) {
+        const cleanupUnderline = $animation?.underlineExpand?.(underline as HTMLElement, {
+          duration: 0.25,
+          trigger: link as HTMLElement
+        })
+        if (cleanupUnderline) cleanupFns.push(cleanupUnderline)
+      }
     })
   }
 })
@@ -101,7 +109,8 @@ onUnmounted(() => {
               class="app-nav__link"
               @click="scrollToSection(item.href)"
             >
-              {{ item.label }}
+              <span class="app-nav__label">{{ item.label }}</span>
+              <span class="app-nav__underline" aria-hidden="true"></span>
             </button>
           </li>
         </ul>
@@ -214,8 +223,7 @@ onUnmounted(() => {
   transition: color 0.3s ease;
 }
 
-.app-nav__link::after {
-  content: '';
+.app-nav__underline {
   position: absolute;
   bottom: 0;
   left: 0;
@@ -226,10 +234,6 @@ onUnmounted(() => {
 
 .app-nav__link:hover {
   color: #d4a24c;
-}
-
-.app-nav__link:hover::after {
-  width: 100%;
 }
 
 /* Mobile Toggle */

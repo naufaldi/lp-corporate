@@ -1,5 +1,7 @@
 import type { GSAP } from 'gsap'
 import type { ScrollTrigger } from 'gsap/ScrollTrigger'
+import type { Observer } from 'gsap/Observer'
+import type { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
 export interface AnimationOptions {
   delay?: number
@@ -8,12 +10,14 @@ export interface AnimationOptions {
   ease?: string
   startAt?: Record<string, unknown>
   yStart?: number
+  y?: number
   scale?: number
   scaleStart?: number
   speed?: number
   direction?: 'left' | 'right' | 'up' | 'down'
   scrub?: boolean
   from?: 'start' | 'end' | 'center' | 'random'
+  trigger?: string | HTMLElement
   start?: number
   end?: number
   prefix?: string
@@ -65,6 +69,7 @@ export interface AnimationAPI {
   focusRing(target: string | HTMLElement, options?: AnimationOptions): (() => void) | undefined
   fadeInUp(target: string | HTMLElement | Element[], options?: AnimationOptions): GSAPTimeline | GSAPPlugin
   staggerReveal(target: string | HTMLElement | Element[], options?: AnimationOptions): GSAPTimeline | GSAPPlugin
+  batchReveal(target: string | HTMLElement | Element[], options?: AnimationOptions): GSAPTimeline | GSAPPlugin
   bgParallax(target: string | HTMLElement, options?: AnimationOptions): GSAPTimeline | GSAPPlugin
   hoverColor(target: string | HTMLElement, options?: AnimationOptions): (() => void) | undefined
   underlineExpand(target: string | HTMLElement, options?: AnimationOptions): (() => void) | undefined
@@ -76,6 +81,8 @@ declare module '#app' {
   interface NuxtApp {
     $gsap: typeof import('gsap').gsap
     $ScrollTrigger: typeof ScrollTrigger
+    $Observer: typeof Observer
+    $ScrollToPlugin: typeof ScrollToPlugin
     $animation: AnimationAPI
     $animationConfig: AnimationConfig
     $animationUtils: AnimationUtils
@@ -86,6 +93,8 @@ declare module 'vue' {
   interface ComponentCustomProperties {
     $gsap: typeof import('gsap').gsap
     $ScrollTrigger: typeof ScrollTrigger
+    $Observer: typeof Observer
+    $ScrollToPlugin: typeof ScrollToPlugin
     $animation: AnimationAPI
     $animationConfig: AnimationConfig
     $animationUtils: AnimationUtils

@@ -1,9 +1,11 @@
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
+import { Observer } from 'gsap/Observer'
 
 export default defineNuxtPlugin((nuxtApp) => {
   if (import.meta.client) {
-    gsap.registerPlugin(ScrollTrigger)
+    gsap.registerPlugin(ScrollTrigger, ScrollToPlugin, Observer)
   }
 
   const config = {
@@ -91,7 +93,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -125,7 +128,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -159,7 +163,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -199,7 +204,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -239,7 +245,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -323,7 +330,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -364,7 +372,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           trigger: target,
           start: config.triggerStart,
           invalidateOnRefresh: true,
-          toggleActions: 'play none none reverse'
+          toggleActions: 'play none none reverse',
+          once: true
         }
       })
     },
@@ -531,7 +540,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -627,7 +637,8 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
@@ -662,10 +673,52 @@ export default defineNuxtPlugin((nuxtApp) => {
             trigger: target,
             start: config.triggerStart,
             invalidateOnRefresh: true,
-            toggleActions: 'play none none reverse'
+            toggleActions: 'play none none reverse',
+            once: true
           }
         }
       )
+    },
+
+    batchReveal(
+      target: string | HTMLElement | Element[],
+      options: {
+        trigger?: string | HTMLElement
+        start?: string
+        duration?: number
+        stagger?: number
+        y?: number
+        ease?: string
+      } = {}
+    ) {
+      const shouldReduce = utils.shouldReduceMotion()
+      const {
+        trigger,
+        start = config.triggerStart,
+        duration = config.durationMedium,
+        stagger = config.staggerBase,
+        y = 24,
+        ease = config.smoothEase
+      } = options
+
+      if (shouldReduce) {
+        return gsap.set(target, { opacity: 1, y: 0 })
+      }
+
+      const triggerElement = trigger ? utils.getElement(trigger) : undefined
+
+      return ScrollTrigger.batch(target, {
+        start,
+        trigger: triggerElement ?? undefined,
+        once: true,
+        onEnter: (batch) => {
+          gsap.fromTo(
+            batch,
+            { opacity: 0, y },
+            { opacity: 1, y: 0, duration, stagger, ease, overwrite: 'auto' }
+          )
+        }
+      })
     },
 
     bgParallax(
@@ -729,14 +782,16 @@ export default defineNuxtPlugin((nuxtApp) => {
       options: {
         duration?: number
         width?: string
+        trigger?: string | HTMLElement
       } = {}
     ) {
-      const { duration = 0.3, width = '100%' } = options
+      const { duration = 0.3, width = '100%', trigger } = options
       const el = utils.getElement(target)
       if (!el) return
+      const triggerEl = trigger ? utils.getElement(trigger) : el
+      if (!triggerEl) return
 
-      el.style.position = 'relative'
-      el.style.overflow = 'hidden'
+      gsap.set(el, { width: '0%' })
 
       const onEnter = () => {
         if (utils.shouldReduceMotion()) return
@@ -746,12 +801,12 @@ export default defineNuxtPlugin((nuxtApp) => {
         gsap.to(el, { width: '0%', duration, ease: 'power2.out' })
       }
 
-      el.addEventListener('mouseenter', onEnter)
-      el.addEventListener('mouseleave', onLeave)
+      triggerEl.addEventListener('mouseenter', onEnter)
+      triggerEl.addEventListener('mouseleave', onLeave)
 
       return () => {
-        el.removeEventListener('mouseenter', onEnter)
-        el.removeEventListener('mouseleave', onLeave)
+        triggerEl.removeEventListener('mouseenter', onEnter)
+        triggerEl.removeEventListener('mouseleave', onLeave)
       }
     }
   }
@@ -760,6 +815,8 @@ export default defineNuxtPlugin((nuxtApp) => {
     provide: {
       gsap,
       ScrollTrigger,
+      ScrollToPlugin,
+      Observer,
       $animation: animations,
       $animationConfig: config,
       $animationUtils: utils

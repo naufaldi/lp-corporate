@@ -36,63 +36,29 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline()
-
-  tl.set('.hero-content', { opacity: 0, y: 30 })
-  tl.set('.stat-row', { opacity: 0, y: 40 })
-  tl.set('.cert-row', { opacity: 0, y: 20 })
-
-  tl.to('.hero-content', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.hero-content', {
+    trigger: '#stats',
     duration: 0.8,
-    ease: 'power3.out',
-    scrollTrigger: {
-      trigger: '#stats',
-      start: 'top 70%'
-    }
+    y: 30
   })
 
-  tl.to('.stat-row', {
-    opacity: 1,
-    x: 0,
-    duration: 0.6,
+  $animation?.batchReveal?.('.stat-row', {
+    trigger: '.stats-column',
     stagger: 0.12,
-    ease: 'power2.out',
-    scrollTrigger: {
-      trigger: '.stats-column',
-      start: 'top 60%'
-    }
-  }, '+=0.1')
+    y: 40
+  })
 
-  tl.to('.cert-row', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.cert-row', {
+    trigger: '.cert-row',
     duration: 0.5,
-    ease: 'power2.out',
-    scrollTrigger: {
-      trigger: '.cert-row',
-      start: 'top 80%'
-    }
-  }, '+=0.1')
+    y: 20
+  })
 
   document.querySelectorAll('.stat-row').forEach((row) => {
     const cleanup = $animation?.hoverScale?.(row as HTMLElement, { scale: 1.02, duration: 0.3 })
     if (cleanup) cleanupFns.push(cleanup)
   })
 
-  document.querySelectorAll('.stat-row').forEach((row) => {
-    $gsap.to(row, {
-      scrollTrigger: {
-        trigger: row,
-        start: 'top 80%',
-        end: 'bottom 20%',
-        scrub: 0.5
-      },
-      y: -10,
-      ease: 'none'
-    })
-  })
 })
 
 onUnmounted(() => {

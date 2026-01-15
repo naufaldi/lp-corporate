@@ -13,58 +13,30 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline({
-    scrollTrigger: {
-      trigger: '#mission',
-      start: 'top 70%'
-    }
+  $animation?.batchReveal?.('.left-content', {
+    trigger: '#mission',
+    duration: 0.8,
+    y: 50
   })
 
-  tl.set('.left-content', { opacity: 0, y: 50 })
-  tl.set('.right-inner', { opacity: 0, y: 50 })
-  tl.set('.value-card', { opacity: 0, y: 30, scale: 0.95 })
-
-  tl.to('.left-content', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.right-inner', {
+    trigger: '#mission',
     duration: 0.8,
-    ease: 'power3.out'
+    y: 50
   })
 
-  tl.to('.right-inner', {
-    opacity: 1,
-    y: 0,
-    duration: 0.8,
-    ease: 'power3.out'
-  }, '+=0.1')
-
-  tl.to('.value-card', {
-    opacity: 1,
-    y: 0,
-    scale: 1,
+  $animation?.batchReveal?.('.value-card', {
+    trigger: '#mission',
     duration: 0.5,
     stagger: 0.1,
-    ease: 'back.out(1.2)'
-  }, '+=0.1')
+    y: 30
+  })
 
   $animation?.bgParallax?.('.bg-parallax', { speed: 0.15, scrub: true })
 
   document.querySelectorAll('.value-card').forEach((card) => {
     const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.03, duration: 0.3 })
     if (cleanup) cleanupFns.push(cleanup)
-  })
-
-  document.querySelectorAll('.value-card').forEach((card) => {
-    $gsap.to(card, {
-      scrollTrigger: {
-        trigger: card,
-        start: 'top 80%',
-        end: 'bottom 20%',
-        scrub: 0.5
-      },
-      y: -8,
-      ease: 'none'
-    })
   })
 })
 

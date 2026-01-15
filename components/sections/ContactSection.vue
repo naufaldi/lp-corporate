@@ -19,7 +19,7 @@ interface Office {
   isHq: boolean
 }
 
-const { $gsap } = useNuxtApp()
+const { $gsap, $animation } = useNuxtApp()
 let cleanupFns: Array<() => void> = []
 
 const contactInfo: ContactInfo[] = [
@@ -93,128 +93,59 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline({
-    scrollTrigger: {
-      trigger: '#contact',
-      start: 'top 55%'
-    }
-  })
-
-  tl.set('.contact-hero', { opacity: 0, y: 40 })
-  tl.set('.contact-content', { opacity: 0, y: 60 })
-  tl.set('.hero-stat', { opacity: 0, scale: 0.8 })
-  tl.set('.info-card', { opacity: 0, y: 30 })
-  tl.set('.office-card', { opacity: 0, x: -20 })
-  tl.set('.form-group', { opacity: 0, y: 20 })
-
-  tl.to('.contact-hero', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.contact-hero', {
+    trigger: '#contact',
     duration: 1,
-    ease: 'power3.out'
+    y: 40
   })
 
-  tl.to('.hero-stat', {
-    opacity: 1,
-    scale: 1,
+  $animation?.batchReveal?.('.hero-stat', {
+    trigger: '#contact',
     duration: 0.5,
     stagger: 0.12,
-    ease: 'back.out(1.5)'
-  }, '+=0.1')
+    y: 20
+  })
 
-  tl.to('.contact-content', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.contact-content', {
+    trigger: '#contact',
     duration: 0.8,
-    ease: 'power2.out'
-  }, '+=0.1')
+    y: 60
+  })
 
-  tl.to('.info-card', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.info-card', {
+    trigger: '.info-grid',
     duration: 0.5,
     stagger: 0.1,
-    ease: 'power2.out'
-  }, '-=0.3')
+    y: 30
+  })
 
-  tl.to('.office-card', {
-    opacity: 1,
-    x: 0,
+  $animation?.batchReveal?.('.office-card', {
+    trigger: '.offices-grid',
     duration: 0.5,
     stagger: 0.15,
-    ease: 'power2.out'
-  }, '+=0.1')
+    y: 20
+  })
 
-  tl.to('.form-group', {
-    opacity: 1,
-    y: 0,
+  $animation?.batchReveal?.('.form-group', {
+    trigger: '.contact-form',
     duration: 0.4,
     stagger: 0.08,
-    ease: 'power2.out'
-  }, '+=0.1')
+    y: 20
+  })
 
   document.querySelectorAll('.info-card').forEach((card) => {
-    const el = card as HTMLElement
-    const onEnter = () => {
-      if (shouldReduceMotion) return
-      $gsap.to(el, { scale: 1.02, x: 8, duration: 0.3, ease: 'power2.out' })
-    }
-    const onLeave = () => {
-      $gsap.to(el, { scale: 1, x: 0, duration: 0.3, ease: 'power2.out' })
-    }
-    el.addEventListener('mouseenter', onEnter)
-    el.addEventListener('mouseleave', onLeave)
-    cleanupFns.push(() => {
-      el.removeEventListener('mouseenter', onEnter)
-      el.removeEventListener('mouseleave', onLeave)
-    })
+    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
   document.querySelectorAll('.office-card').forEach((card) => {
-    const el = card as HTMLElement
-    const onEnter = () => {
-      if (shouldReduceMotion) return
-      $gsap.to(el, { scale: 1.02, y: -4, duration: 0.3, ease: 'power2.out' })
-    }
-    const onLeave = () => {
-      $gsap.to(el, { scale: 1, y: 0, duration: 0.3, ease: 'power2.out' })
-    }
-    el.addEventListener('mouseenter', onEnter)
-    el.addEventListener('mouseleave', onLeave)
-    cleanupFns.push(() => {
-      el.removeEventListener('mouseenter', onEnter)
-      el.removeEventListener('mouseleave', onLeave)
-    })
+    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
   document.querySelectorAll('.form-input, .form-textarea').forEach((input) => {
-    const el = input as HTMLElement
-    const onFocus = () => {
-      if (shouldReduceMotion) return
-      $gsap.to(el, { scale: 1.01, duration: 0.2, ease: 'power2.out' })
-    }
-    const onBlur = () => {
-      $gsap.to(el, { scale: 1, duration: 0.2, ease: 'power2.out' })
-    }
-    el.addEventListener('focus', onFocus)
-    el.addEventListener('blur', onBlur)
-    cleanupFns.push(() => {
-      el.removeEventListener('focus', onFocus)
-      el.removeEventListener('blur', onBlur)
-    })
-  })
-
-  document.querySelectorAll('.office-card').forEach((card) => {
-    $gsap.to(card, {
-      scrollTrigger: {
-        trigger: card,
-        start: 'top 80%',
-        end: 'bottom 20%',
-        scrub: 0.5
-      },
-      y: -6,
-      ease: 'none'
-    })
+    const cleanup = $animation?.focusRing?.(input as HTMLElement, { scale: 1.01, duration: 0.2 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 })
 
@@ -237,7 +168,7 @@ onUnmounted(() => {
         <div class="hero-badge">
           <span class="badge-icon">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
           </span>
           <span class="badge-text">Contact Our Team</span>
@@ -288,16 +219,16 @@ onUnmounted(() => {
               >
                 <div class="info-icon">
                   <svg v-if="info.icon === 'email'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <rect x="2" y="4" width="20" height="16" rx="2"/>
-                    <path d="M22 6L12 13 2 6"/>
+                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                    <path d="M22 6L12 13 2 6" />
                   </svg>
                   <svg v-else-if="info.icon === 'phone'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z" />
                   </svg>
                   <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                    <path d="M2 12h20"/>
+                    <circle cx="12" cy="12" r="10" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                    <path d="M2 12h20" />
                   </svg>
                 </div>
                 <div class="info-details">
@@ -306,7 +237,7 @@ onUnmounted(() => {
                 </div>
                 <div class="info-arrow">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                    <path d="M5 12h14M12 5l7 7-7 7" />
                   </svg>
                 </div>
               </a>
@@ -624,7 +555,6 @@ onUnmounted(() => {
 
 .info-card:hover {
   border-color: rgba(196, 91, 40, 0.3);
-  transform: translateX(8px);
   box-shadow: 0 8px 24px rgba(44, 36, 22, 0.08);
 }
 
@@ -709,7 +639,6 @@ onUnmounted(() => {
 }
 
 .office-card:hover {
-  transform: translateY(-4px);
   box-shadow: 0 12px 32px rgba(44, 36, 22, 0.2);
 }
 

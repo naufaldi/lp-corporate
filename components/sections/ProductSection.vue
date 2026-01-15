@@ -80,93 +80,55 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline({
-    scrollTrigger: {
-      trigger: '#product',
-      start: 'top 55%',
-      end: 'bottom 80%',
-      toggleActions: 'play none none reverse'
-    }
-  })
-
-  tl.set('.product-left', { opacity: 0, x: -60 })
-  tl.set('.section-label', { opacity: 0, y: 20 })
-  tl.set('.product-title', { opacity: 0, y: 30 })
-  tl.set('.product-description', { opacity: 0, y: 20 })
-  tl.set('.capacity-badge', { opacity: 0, scale: 0.8 })
-  tl.set('.cert-row', { opacity: 0, y: 20 })
-  tl.set('.spec-card', { opacity: 0, y: 40, scale: 0.95 })
-  tl.set('.feature-card', { opacity: 0, y: 30, scale: 0.98 })
-
-  tl.to('.product-left', {
-    opacity: 1,
-    x: 0,
-    duration: 1,
-    ease: 'power3.out'
-  })
-  .to('.section-label', {
-    opacity: 1,
-    y: 0,
-    duration: 0.6,
-    ease: 'power2.out'
-  }, '-=0.6')
-  .to('.product-title', {
-    opacity: 1,
-    y: 0,
-    duration: 0.7,
-    ease: 'power2.out'
-  }, '-=0.4')
-  .to('.product-description', {
-    opacity: 1,
-    y: 0,
-    duration: 0.6,
-    ease: 'power2.out'
-  }, '-=0.4')
-  .to('.capacity-badge', {
-    opacity: 1,
-    scale: 1,
+  $animation?.batchReveal?.('.product-left', {
+    trigger: '#product',
     duration: 0.8,
-    ease: 'elastic.out(1, 0.6)'
-  }, '-=0.2')
-  .to('.cert-row', {
-    opacity: 1,
-    y: 0,
+    y: 30
+  })
+
+  $animation?.batchReveal?.('.section-label', {
+    trigger: '#product',
     duration: 0.5,
-    stagger: 0.1,
-    ease: 'power2.out'
-  }, '-=0.3')
-  .to('.product-right', {
-    opacity: 1,
-    duration: 0.8,
-    ease: 'power2.out'
-  }, '-=0.8')
-  .to('.spec-card', {
-    opacity: 1,
-    y: 0,
-    scale: 1,
+    y: 20
+  })
+
+  $animation?.batchReveal?.('.product-title', {
+    trigger: '#product',
+    duration: 0.6,
+    y: 24
+  })
+
+  $animation?.batchReveal?.('.product-description', {
+    trigger: '#product',
+    duration: 0.5,
+    y: 20
+  })
+
+  $animation?.batchReveal?.('.capacity-badge', {
+    trigger: '#product',
+    duration: 0.7,
+    y: 20
+  })
+
+  $animation?.batchReveal?.('.cert-row', {
+    trigger: '#product',
     duration: 0.5,
     stagger: 0.08,
-    ease: 'back.out(1.2)'
-  }, '-=0.4')
-  .to('.feature-card', {
-    opacity: 1,
-    y: 0,
-    scale: 1,
+    y: 20
+  })
+
+  $animation?.batchReveal?.('.spec-card', {
+    trigger: '.specs-grid',
+    duration: 0.5,
+    stagger: 0.08,
+    y: 30
+  })
+
+  $animation?.batchReveal?.('.feature-card', {
+    trigger: '.features-grid',
     duration: 0.5,
     stagger: 0.1,
-    ease: 'power2.out'
-  }, '-=0.3')
-
-  $gsap.to('.capacity-badge', {
-    scrollTrigger: {
-      trigger: '.capacity-badge',
-      start: 'top 85%',
-      end: 'bottom 15%',
-      scrub: 1
-    },
-    y: -8,
-    scale: 1.02,
-    ease: 'none'
+    y: 30
   })
 
   document.querySelectorAll('.spec-card').forEach((card) => {
@@ -179,20 +141,6 @@ onMounted(() => {
     if (cleanup) cleanupFns.push(cleanup)
   })
 
-  const featureCards = document.querySelectorAll('.feature-card')
-  featureCards.forEach((card) => {
-    $gsap.to(card, {
-      scrollTrigger: {
-        trigger: card,
-        start: 'top 75%',
-        end: 'bottom 25%',
-        scrub: 0.5
-      },
-      y: -5,
-      scale: 1.01,
-      ease: 'none'
-    })
-  })
 })
 </script>
 
@@ -592,7 +540,6 @@ onMounted(() => {
 
 .spec-card:hover {
   border-color: rgba(196, 91, 40, 0.25);
-  transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(44, 36, 22, 0.08);
 }
 
@@ -676,7 +623,6 @@ onMounted(() => {
 
 .feature-card:hover {
   background: #3a3025;
-  transform: translateY(-3px);
 }
 
 .feature-icon {

@@ -385,12 +385,7 @@ onUnmounted(() => {
 }
 
 .hero-cta:hover {
-  transform: translateY(-3px);
   box-shadow: 0 12px 32px rgba(196, 91, 40, 0.4);
-}
-
-.hero-cta:active {
-  transform: translateY(-1px);
 }
 
 .cta-icon {

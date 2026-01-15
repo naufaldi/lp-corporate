@@ -120,7 +120,14 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline({ defaults: { ease: 'power3.out' } })
+  const tl = $gsap.timeline({
+    defaults: { ease: 'power3.out' },
+    scrollTrigger: {
+      trigger: '#sustainability',
+      start: 'top 70%',
+      once: true
+    }
+  })
 
   tl.from('.sustainability-background', {
     opacity: 0,
@@ -132,15 +139,28 @@ onMounted(() => {
     ease: 'power2.out'
   }, '-=0.4')
 
-  $animation?.staggerReveal?.('.journey-intro > *', { stagger: 0.1 })
+  $animation?.batchReveal?.('.journey-intro > *', {
+    trigger: '#sustainability',
+    stagger: 0.1,
+    y: 24
+  })
 
   $gsap.from('.timeline-track', {
     scaleX: 0,
     duration: 0.8,
-    ease: 'power2.inOut'
+    ease: 'power2.inOut',
+    scrollTrigger: {
+      trigger: '#sustainability',
+      start: 'top 70%',
+      once: true
+    }
   })
 
-  $animation?.staggerReveal?.('.milestone-node', { stagger: 0.15, from: 'random' })
+  $animation?.batchReveal?.('.milestone-node', {
+    trigger: '#sustainability',
+    stagger: 0.15,
+    y: 24
+  })
 
   $gsap.from('.floating-particles', {
     opacity: 0,
@@ -588,7 +608,7 @@ onUnmounted(() => {
 }
 
 .milestone-node:hover {
-  transform: scale(1.05) translateY(-5px);
+  transform: scale(1.05);
 }
 
 .node-marker {
