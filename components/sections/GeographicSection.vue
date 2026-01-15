@@ -10,11 +10,10 @@ onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
-    $gsap.set(['.geo-label', '.geo-title', '.geo-card', '.market-item', '.singapore-card'], { opacity: 1, y: 0 })
+    $gsap.set(['.geo-label', '.geo-title', '.geo-card', '.market-item', '.singapore-card'], { opacity: 1, y: 0, x: 0 })
     return
   }
 
-  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
   const tl = $gsap.timeline({
     scrollTrigger: {
       trigger: '#geographic',
@@ -28,7 +27,6 @@ onMounted(() => {
   tl.set('.market-item', { opacity: 0, x: -20 })
   tl.set('.singapore-card', { opacity: 0, x: 100 })
 
-  // 0ms: Label and title
   tl.to('.geo-label', {
     opacity: 1,
     y: 0,
@@ -42,7 +40,6 @@ onMounted(() => {
     ease: 'power3.out'
   }, '-=0.3')
 
-  // 200ms: Geo cards stagger
   tl.to('.geo-card', {
     opacity: 1,
     y: 0,
@@ -52,7 +49,6 @@ onMounted(() => {
     ease: 'power3.out'
   }, '+=0.1')
 
-  // 400ms: Market items and Singapore card
   tl.to('.market-item', {
     opacity: 1,
     x: 0,
@@ -67,7 +63,17 @@ onMounted(() => {
     ease: 'power3.out'
   }, '-=0.3')
 
-  // Indonesia map subtle animation
+  $gsap.to('.map-layer', {
+    scrollTrigger: {
+      trigger: '#geographic',
+      start: 'top bottom',
+      end: 'bottom top',
+      scrub: 1
+    },
+    xPercent: -3,
+    ease: 'none'
+  })
+
   $gsap.fromTo('.indonesia-focus', 
     { scale: 1, opacity: 0.8 },
     { 
@@ -81,7 +87,6 @@ onMounted(() => {
     }
   )
 
-  // Apply hover scale effects to geo cards
   document.querySelectorAll('.geo-card').forEach((card) => {
     const el = card as HTMLElement
     const onEnter = () => {
@@ -99,7 +104,6 @@ onMounted(() => {
     })
   })
 
-  // Scroll parallax on Singapore card
   $gsap.to('.singapore-card', {
     scrollTrigger: {
       trigger: '.singapore-card',

@@ -89,11 +89,10 @@ onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
-    $gsap.set(['.contact-hero', '.contact-content'], { opacity: 1 })
+    $gsap.set(['.contact-hero', '.hero-stat', '.contact-content', '.info-card', '.office-card', '.form-group'], { opacity: 1, y: 0 })
     return
   }
 
-  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
   const tl = $gsap.timeline({
     scrollTrigger: {
       trigger: '#contact',
@@ -108,7 +107,6 @@ onMounted(() => {
   tl.set('.office-card', { opacity: 0, x: -20 })
   tl.set('.form-group', { opacity: 0, y: 20 })
 
-  // 0ms: Hero content
   tl.to('.contact-hero', {
     opacity: 1,
     y: 0,
@@ -116,7 +114,6 @@ onMounted(() => {
     ease: 'power3.out'
   })
 
-  // 200ms: Hero stats stagger
   tl.to('.hero-stat', {
     opacity: 1,
     scale: 1,
@@ -125,7 +122,6 @@ onMounted(() => {
     ease: 'back.out(1.5)'
   }, '+=0.1')
 
-  // 400ms: Contact content with info cards
   tl.to('.contact-content', {
     opacity: 1,
     y: 0,
@@ -133,7 +129,6 @@ onMounted(() => {
     ease: 'power2.out'
   }, '+=0.1')
 
-  // Info cards stagger
   tl.to('.info-card', {
     opacity: 1,
     y: 0,
@@ -142,7 +137,6 @@ onMounted(() => {
     ease: 'power2.out'
   }, '-=0.3')
 
-  // Office cards stagger
   tl.to('.office-card', {
     opacity: 1,
     x: 0,
@@ -151,7 +145,6 @@ onMounted(() => {
     ease: 'power2.out'
   }, '+=0.1')
 
-  // Form groups stagger
   tl.to('.form-group', {
     opacity: 1,
     y: 0,
@@ -160,7 +153,6 @@ onMounted(() => {
     ease: 'power2.out'
   }, '+=0.1')
 
-  // Apply hover scale effects to info cards
   document.querySelectorAll('.info-card').forEach((card) => {
     const el = card as HTMLElement
     const onEnter = () => {
@@ -178,7 +170,6 @@ onMounted(() => {
     })
   })
 
-  // Apply hover scale effects to office cards
   document.querySelectorAll('.office-card').forEach((card) => {
     const el = card as HTMLElement
     const onEnter = () => {
@@ -196,7 +187,6 @@ onMounted(() => {
     })
   })
 
-  // Apply focus ring animation to form inputs
   document.querySelectorAll('.form-input, .form-textarea').forEach((input) => {
     const el = input as HTMLElement
     const onFocus = () => {
@@ -214,7 +204,6 @@ onMounted(() => {
     })
   })
 
-  // Scroll parallax on office cards
   document.querySelectorAll('.office-card').forEach((card) => {
     $gsap.to(card, {
       scrollTrigger: {

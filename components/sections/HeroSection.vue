@@ -85,17 +85,14 @@ onMounted(() => {
     ease: 'power2.out'
   }, '-=0.2')
 
-  // Apply hover effects
   const cleanupHover = $animation?.hoverScale?.('.hero-cta', { scale: 1.03, duration: 0.3 })
   const cleanupMagnetic = $animation?.magneticButton?.('.hero-cta', { strength: 20, duration: 0.25 })
   
   if (cleanupHover) cleanupFns.push(cleanupHover)
   if (cleanupMagnetic) cleanupFns.push(cleanupMagnetic)
 
-  // Parallax on scroll
   $animation?.parallaxFlow?.('.hero-bg', { speed: 0.15, direction: 'left', scrub: true })
 
-  // Animate floating particles
   $gsap.to('.floating-particle', {
     y: -40,
     rotation: 360,

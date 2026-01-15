@@ -16,7 +16,7 @@ interface ProductFeature {
   icon: string
 }
 
-const { $gsap } = useNuxtApp()
+const { $gsap, $animation } = useNuxtApp()
 
 const specifications: Specification[] = [
   { parameter: 'Free Fatty Acids (FFA)', value: '2.5', unit: '% max', icon: 'ffa-test' },
@@ -76,18 +76,9 @@ onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
-    $gsap.set(['.product-left', '.product-right'], { opacity: 1 })
+    $gsap.set(['.product-left', '.product-right', '.spec-card', '.feature-card'], { opacity: 1, y: 0 })
     return
   }
-
-  $gsap.set('.product-left', { opacity: 0, x: -60 })
-  $gsap.set('.section-label', { opacity: 0, y: 20 })
-  $gsap.set('.product-title', { opacity: 0, y: 30 })
-  $gsap.set('.product-description', { opacity: 0, y: 20 })
-  $gsap.set('.capacity-badge', { opacity: 0, scale: 0.8 })
-  $gsap.set('.cert-row', { opacity: 0, y: 20 })
-  $gsap.set('.spec-card', { opacity: 0, y: 40, scale: 0.95 })
-  $gsap.set('.feature-card', { opacity: 0, y: 30, scale: 0.98 })
 
   const tl = $gsap.timeline({
     scrollTrigger: {
@@ -97,6 +88,15 @@ onMounted(() => {
       toggleActions: 'play none none reverse'
     }
   })
+
+  tl.set('.product-left', { opacity: 0, x: -60 })
+  tl.set('.section-label', { opacity: 0, y: 20 })
+  tl.set('.product-title', { opacity: 0, y: 30 })
+  tl.set('.product-description', { opacity: 0, y: 20 })
+  tl.set('.capacity-badge', { opacity: 0, scale: 0.8 })
+  tl.set('.cert-row', { opacity: 0, y: 20 })
+  tl.set('.spec-card', { opacity: 0, y: 40, scale: 0.95 })
+  tl.set('.feature-card', { opacity: 0, y: 30, scale: 0.98 })
 
   tl.to('.product-left', {
     opacity: 1,
@@ -167,6 +167,16 @@ onMounted(() => {
     y: -8,
     scale: 1.02,
     ease: 'none'
+  })
+
+  document.querySelectorAll('.spec-card').forEach((card) => {
+    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
+  })
+
+  document.querySelectorAll('.feature-card').forEach((card) => {
+    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.03, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
   const featureCards = document.querySelectorAll('.feature-card')

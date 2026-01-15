@@ -9,7 +9,7 @@ interface Milestone {
   details: string[]
 }
 
-const { $gsap, $ScrollTrigger } = useNuxtApp()
+const { $gsap, $ScrollTrigger, $animation } = useNuxtApp()
 
 const activeNode = ref<number | null>(null)
 const expandedNodes = ref<number[]>([])
@@ -113,6 +113,13 @@ const onImageError = (e: Event) => {
 }
 
 onMounted(() => {
+  const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (shouldReduceMotion) {
+    $gsap.set(['.sustainability-background', '.bg-image', '.journey-intro', '.journey-timeline', '.milestone-node'], { opacity: 1 })
+    return
+  }
+
   const tl = $gsap.timeline({ defaults: { ease: 'power3.out' } })
 
   tl.from('.sustainability-background', {
@@ -124,68 +131,31 @@ onMounted(() => {
     duration: 1.5,
     ease: 'power2.out'
   }, '-=0.4')
-  .from('.journey-intro', {
-    x: -80,
-    opacity: 0,
-    duration: 1,
-    ease: 'power3.out'
-  }, '-=0.8')
-  .from('.intro-badge', {
-    y: 20,
-    opacity: 0,
-    duration: 0.5
-  }, '-=0.6')
-  .from('.journey-headline', {
-    y: 30,
-    opacity: 0,
-    duration: 0.6,
-    ease: 'back.out(1.7)'
-  }, '-=0.3')
-  .from('.journey-description', {
-    y: 20,
-    opacity: 0,
-    duration: 0.5
-  }, '-=0.2')
-  .from('.stat-item', {
-    y: 20,
-    opacity: 0,
-    duration: 0.4,
-    stagger: 0.1
-  }, '-=0.1')
-  .from('.timeline-track', {
+
+  $animation?.staggerReveal?.('.journey-intro > *', { stagger: 0.1 })
+
+  $gsap.from('.timeline-track', {
     scaleX: 0,
     duration: 0.8,
     ease: 'power2.inOut'
-  }, '-=0.2')
-  .from('.milestone-node', {
-    scale: 0,
-    opacity: 0,
-    duration: 0.5,
-    stagger: 0.15,
-    ease: 'back.out(1.7)'
-  }, '-=0.2')
-  .from('.floating-particles', {
+  })
+
+  $animation?.staggerReveal?.('.milestone-node', { stagger: 0.15, from: 'random' })
+
+  $gsap.from('.floating-particles', {
     opacity: 0,
     duration: 0.5
-  }, '-=0.5')
-  .from('.corner-accent', {
+  })
+
+  $gsap.from('.corner-accent', {
     scale: 0,
     opacity: 0,
     duration: 0.4,
     stagger: 0.1,
     ease: 'back.out(2)'
-  }, '-=0.3')
-
-  $gsap.to('.bg-image', {
-    scrollTrigger: {
-      trigger: '.sustainability-section',
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: true
-    },
-    yPercent: 20,
-    ease: 'none'
   })
+
+  $animation?.bgParallax?.('.bg-image', { speed: 0.2, scrub: true })
 
   $gsap.to('.bg-gradient-mesh', {
     scrollTrigger: {
@@ -219,6 +189,11 @@ onMounted(() => {
     },
     y: -100,
     ease: 'none'
+  })
+
+  document.querySelectorAll('.milestone-node').forEach((node) => {
+    const cleanup = $animation?.hoverScale?.(node as HTMLElement, { scale: 1.05, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
   const progressTl = $gsap.timeline({

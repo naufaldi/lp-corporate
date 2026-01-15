@@ -36,14 +36,12 @@ onMounted(() => {
     return
   }
 
-  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
   const tl = $gsap.timeline()
 
   tl.set('.hero-content', { opacity: 0, y: 30 })
   tl.set('.stat-row', { opacity: 0, y: 40 })
   tl.set('.cert-row', { opacity: 0, y: 20 })
 
-  // 0ms: Hero content
   tl.to('.hero-content', {
     opacity: 1,
     y: 0,
@@ -55,7 +53,6 @@ onMounted(() => {
     }
   })
 
-  // 200ms: Stats stagger in
   tl.to('.stat-row', {
     opacity: 1,
     x: 0,
@@ -68,7 +65,6 @@ onMounted(() => {
     }
   }, '+=0.1')
 
-  // 400ms: Certifications reveal
   tl.to('.cert-row', {
     opacity: 1,
     y: 0,
@@ -80,25 +76,11 @@ onMounted(() => {
     }
   }, '+=0.1')
 
-  // Apply hover scale effects to stat rows
   document.querySelectorAll('.stat-row').forEach((row) => {
-    const el = row as HTMLElement
-    const onEnter = () => {
-      if (shouldReduceMotion) return
-      $gsap.to(el, { scale: 1.02, duration: 0.3, ease: 'power2.out' })
-    }
-    const onLeave = () => {
-      $gsap.to(el, { scale: 1, duration: 0.3, ease: 'power2.out' })
-    }
-    el.addEventListener('mouseenter', onEnter)
-    el.addEventListener('mouseleave', onLeave)
-    cleanupFns.push(() => {
-      el.removeEventListener('mouseenter', onEnter)
-      el.removeEventListener('mouseleave', onLeave)
-    })
+    const cleanup = $animation?.hoverScale?.(row as HTMLElement, { scale: 1.02, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
-  // Scroll parallax on stat rows
   document.querySelectorAll('.stat-row').forEach((row) => {
     $gsap.to(row, {
       scrollTrigger: {

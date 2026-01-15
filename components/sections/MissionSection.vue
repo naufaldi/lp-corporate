@@ -2,18 +2,17 @@
 import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 
-const { $gsap } = useNuxtApp()
+const { $gsap, $animation } = useNuxtApp()
 let cleanupFns: Array<() => void> = []
 
 onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
-    $gsap.set(['.left-content', '.right-inner', '.value-card'], { y: 0 })
+    $gsap.set(['.left-content', '.right-inner', '.value-card'], { opacity: 1, y: 0 })
     return
   }
 
-  // Orchestrated reveal sequence: 0ms → 200ms → 400ms stagger
   const tl = $gsap.timeline({
     scrollTrigger: {
       trigger: '#mission',
@@ -25,7 +24,6 @@ onMounted(() => {
   tl.set('.right-inner', { opacity: 0, y: 50 })
   tl.set('.value-card', { opacity: 0, y: 30, scale: 0.95 })
 
-  // 0ms: Left content
   tl.to('.left-content', {
     opacity: 1,
     y: 0,
@@ -33,7 +31,6 @@ onMounted(() => {
     ease: 'power3.out'
   })
 
-  // 200ms: Right content
   tl.to('.right-inner', {
     opacity: 1,
     y: 0,
@@ -41,7 +38,6 @@ onMounted(() => {
     ease: 'power3.out'
   }, '+=0.1')
 
-  // 400ms: Value cards stagger
   tl.to('.value-card', {
     opacity: 1,
     y: 0,
@@ -51,37 +47,13 @@ onMounted(() => {
     ease: 'back.out(1.2)'
   }, '+=0.1')
 
-  // Parallax on background
-  $gsap.to('.bg-parallax', {
-    scrollTrigger: {
-      trigger: '#mission',
-      start: 'top bottom',
-      end: 'bottom top',
-      scrub: true
-    },
-    yPercent: 15,
-    ease: 'none'
-  })
+  $animation?.bgParallax?.('.bg-parallax', { speed: 0.15, scrub: true })
 
-  // Apply hover scale effects to value cards
   document.querySelectorAll('.value-card').forEach((card) => {
-    const el = card as HTMLElement
-    const onEnter = () => {
-      if (shouldReduceMotion) return
-      $gsap.to(el, { scale: 1.03, y: -4, duration: 0.3, ease: 'power2.out' })
-    }
-    const onLeave = () => {
-      $gsap.to(el, { scale: 1, y: 0, duration: 0.3, ease: 'power2.out' })
-    }
-    el.addEventListener('mouseenter', onEnter)
-    el.addEventListener('mouseleave', onLeave)
-    cleanupFns.push(() => {
-      el.removeEventListener('mouseenter', onEnter)
-      el.removeEventListener('mouseleave', onLeave)
-    })
+    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.03, duration: 0.3 })
+    if (cleanup) cleanupFns.push(cleanup)
   })
 
-  // Scroll parallax on value cards
   document.querySelectorAll('.value-card').forEach((card) => {
     $gsap.to(card, {
       scrollTrigger: {

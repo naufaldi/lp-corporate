@@ -9,6 +9,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const config = {
     flowEase: 'power2.inOut',
     revealEase: 'power3.out',
+    smoothEase: 'cubic-bezier(0.25, 0.1, 0.25, 1)',
     elasticEase: 'elastic.out(1, 0.5)',
     staggerBase: 0.08,
     durationShort: 0.4,
@@ -17,7 +18,9 @@ export default defineNuxtPlugin((nuxtApp) => {
     parallaxSpeed: 0.3,
     scrubFactor: 0.5,
     magneticStrength: 25,
-    magneticDuration: 0.3
+    magneticDuration: 0.3,
+    triggerStart: 'top 70%',
+    triggerEnd: 'bottom 20%'
   }
 
   const utils = {
@@ -86,7 +89,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           ease,
           scrollTrigger: {
             trigger: target,
-            start: 'top 75%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
@@ -119,7 +123,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           ease: config.flowEase,
           scrollTrigger: {
             trigger: target,
-            start: 'top 80%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
@@ -152,7 +157,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           ease: config.flowEase,
           scrollTrigger: {
             trigger: target,
-            start: 'top 80%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
@@ -188,10 +194,11 @@ export default defineNuxtPlugin((nuxtApp) => {
           duration,
           stagger,
           delay,
-          ease: config.revealEase,
+          ease: config.smoothEase,
           scrollTrigger: {
             trigger: target,
-            start: 'top 75%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
@@ -230,7 +237,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           ease: config.elasticEase,
           scrollTrigger: {
             trigger: target,
-            start: 'top 80%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
@@ -259,7 +267,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           trigger: target,
           start: 'top bottom',
           end: 'bottom top',
-          scrub: scrub ? config.scrubFactor : false
+          scrub: scrub ? config.scrubFactor : false,
+          invalidateOnRefresh: true
         }
       })
     },
@@ -283,7 +292,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           trigger: target,
           start: 'top bottom',
           end: 'bottom top',
-          scrub: scrub ? config.scrubFactor : false
+          scrub: scrub ? config.scrubFactor : false,
+          invalidateOnRefresh: true
         }
       })
     },
@@ -311,7 +321,8 @@ export default defineNuxtPlugin((nuxtApp) => {
           ease: 'power1.inOut',
           scrollTrigger: {
             trigger: target,
-            start: 'top 70%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
@@ -351,7 +362,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         },
         scrollTrigger: {
           trigger: target,
-          start: 'top 75%',
+          start: config.triggerStart,
+          invalidateOnRefresh: true,
           toggleActions: 'play none none reverse'
         }
       })
@@ -517,14 +529,14 @@ export default defineNuxtPlugin((nuxtApp) => {
           ease: config.flowEase,
           scrollTrigger: {
             trigger: target,
-            start: 'top 75%',
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
             toggleActions: 'play none none reverse'
           }
         }
       )
     },
 
-    // Underline animation for links
     linkUnderline(
       target: string | HTMLElement,
       options: {
@@ -555,7 +567,6 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
     },
 
-    // Focus ring animation for form fields
     focusRing(
       target: string | HTMLElement,
       options: {
@@ -584,6 +595,163 @@ export default defineNuxtPlugin((nuxtApp) => {
       return () => {
         el.removeEventListener('focus', onFocus)
         el.removeEventListener('blur', onBlur)
+      }
+    },
+
+    fadeInUp(
+      target: string | HTMLElement | Element[],
+      options: {
+        delay?: number
+        duration?: number
+        stagger?: number
+        yStart?: number
+      } = {}
+    ) {
+      const shouldReduce = utils.shouldReduceMotion()
+      const { delay = 0, duration = 0.6, stagger = 0, yStart = 30 } = options
+
+      if (shouldReduce) {
+        return gsap.set(target, { opacity: 1 })
+      }
+
+      return gsap.fromTo(target,
+        { opacity: 0, y: yStart },
+        {
+          opacity: 1,
+          y: 0,
+          duration,
+          stagger,
+          delay,
+          ease: config.smoothEase,
+          scrollTrigger: {
+            trigger: target,
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
+            toggleActions: 'play none none reverse'
+          }
+        }
+      )
+    },
+
+    staggerReveal(
+      target: string | HTMLElement | Element[],
+      options: {
+        delay?: number
+        duration?: number
+        stagger?: number
+        from?: 'start' | 'end' | 'center' | 'random'
+      } = {}
+    ) {
+      const shouldReduce = utils.shouldReduceMotion()
+      const { delay = 0, duration = 0.5, stagger = 0.1, from = 'start' } = options
+
+      if (shouldReduce) {
+        return gsap.set(target, { opacity: 1, y: 0 })
+      }
+
+      return gsap.fromTo(target,
+        { opacity: 0, y: 20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration,
+          stagger,
+          delay,
+          ease: config.smoothEase,
+          scrollTrigger: {
+            trigger: target,
+            start: config.triggerStart,
+            invalidateOnRefresh: true,
+            toggleActions: 'play none none reverse'
+          }
+        }
+      )
+    },
+
+    bgParallax(
+      target: string | HTMLElement,
+      options: {
+        speed?: number
+        direction?: 'up' | 'down'
+        scrub?: boolean
+      } = {}
+    ) {
+      const shouldReduce = utils.shouldReduceMotion()
+      const { speed = 0.15, direction = 'up', scrub = true } = options
+
+      if (shouldReduce) return
+
+      const yPercent = direction === 'up' ? -speed * 100 : speed * 100
+
+      return gsap.to(target, {
+        yPercent,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: target,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: scrub ? 1 : false,
+          invalidateOnRefresh: true
+        }
+      })
+    },
+
+    hoverColor(
+      target: string | HTMLElement,
+      options: {
+        color?: string
+        duration?: number
+      } = {}
+    ) {
+      const { color, duration = 0.3 } = options
+      const el = utils.getElement(target)
+      if (!el) return
+
+      const onEnter = () => {
+        if (utils.shouldReduceMotion() || !color) return
+        gsap.to(el, { color, duration, ease: 'power2.out' })
+      }
+      const onLeave = () => {
+        gsap.to(el, { color: '', duration, ease: 'power2.out' })
+      }
+
+      el.addEventListener('mouseenter', onEnter)
+      el.addEventListener('mouseleave', onLeave)
+
+      return () => {
+        el.removeEventListener('mouseenter', onEnter)
+        el.removeEventListener('mouseleave', onLeave)
+      }
+    },
+
+    underlineExpand(
+      target: string | HTMLElement,
+      options: {
+        duration?: number
+        width?: string
+      } = {}
+    ) {
+      const { duration = 0.3, width = '100%' } = options
+      const el = utils.getElement(target)
+      if (!el) return
+
+      el.style.position = 'relative'
+      el.style.overflow = 'hidden'
+
+      const onEnter = () => {
+        if (utils.shouldReduceMotion()) return
+        gsap.to(el, { width, duration, ease: 'power2.out' })
+      }
+      const onLeave = () => {
+        gsap.to(el, { width: '0%', duration, ease: 'power2.out' })
+      }
+
+      el.addEventListener('mouseenter', onEnter)
+      el.addEventListener('mouseleave', onLeave)
+
+      return () => {
+        el.removeEventListener('mouseenter', onEnter)
+        el.removeEventListener('mouseleave', onLeave)
       }
     }
   }

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
+import { useNuxtApp } from '#app'
 
 interface NavItem {
   label: string
@@ -18,6 +19,9 @@ const navItems: NavItem[] = [
 const isScrolled = ref(false)
 const isMobileMenuOpen = ref(false)
 const isMobile = ref(false)
+
+const { $animation } = useNuxtApp()
+let cleanupFns: Array<() => void> = []
 
 const checkScroll = () => {
   isScrolled.value = window.scrollY > 50
@@ -48,11 +52,26 @@ onMounted(() => {
   checkMobile()
   window.addEventListener('scroll', checkScroll)
   window.addEventListener('resize', checkMobile)
+
+  const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  if (!shouldReduceMotion) {
+    document.querySelectorAll('.app-nav__link').forEach((link) => {
+      const cleanupHover = $animation?.hoverScale?.(link as HTMLElement, { scale: 1.05, duration: 0.2 })
+      if (cleanupHover) cleanupFns.push(cleanupHover)
+    })
+
+    document.querySelectorAll('.app-nav__link::after').forEach((underline) => {
+      const cleanupUnderline = $animation?.underlineExpand?.(underline as HTMLElement, { duration: 0.25 })
+      if (cleanupUnderline) cleanupFns.push(cleanupUnderline)
+    })
+  }
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', checkScroll)
   window.removeEventListener('resize', checkMobile)
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 </script>
 
@@ -203,7 +222,6 @@ onUnmounted(() => {
   width: 0;
   height: 2px;
   background: #d4a24c;
-  transition: width 0.3s ease;
 }
 
 .app-nav__link:hover {
