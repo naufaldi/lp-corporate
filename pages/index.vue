@@ -26,6 +26,7 @@ const onTouchStart = (e: TouchEvent) => {
 const goToSection = (index: number) => {
   const panel = panels[index]
   if (!panel) return
+  if (scrollTween) return
 
   scrollTween = $gsap.to(window, {
     scrollTo: { y: panel, autoKill: false },
@@ -37,8 +38,11 @@ const goToSection = (index: number) => {
       normalizeObserver.enable()
     },
     onComplete: () => {
-      scrollTween = null
+      // Keep scrollTween truthy through refresh so triggers can't cascade.
       $ScrollTrigger.refresh()
+      $gsap.delayedCall(0, () => {
+        scrollTween = null
+      })
     }
   })
 }
@@ -85,7 +89,7 @@ onMounted(() => {
     end: () => {
       const last = panels[panels.length - 1]
       if (!last) return 'max'
-      return last.offsetTop + last.offsetHeight
+      return last.offsetTop
     },
     snap: panels.length > 1 ? 1 / (panels.length - 1) : 1
   })

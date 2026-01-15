@@ -834,9 +834,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       gsap,
       ScrollTrigger,
       Observer,
-      $animation: animations,
-      $animationConfig: config,
-      $animationUtils: utils
+      animation: animations,
+      animationConfig: config,
+      animationUtils: utils
     }
   }
 })

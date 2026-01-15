@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useNuxtApp } from '#app'
 
 interface Specification {
@@ -17,6 +17,7 @@ interface ProductFeature {
 }
 
 const { $gsap, $animation } = useNuxtApp()
+let cleanupFns: Array<() => void> = []
 
 const specifications: Specification[] = [
   { parameter: 'Free Fatty Acids (FFA)', value: '2.5', unit: '% max', icon: 'ffa-test' },
@@ -141,6 +142,10 @@ onMounted(() => {
     if (cleanup) cleanupFns.push(cleanup)
   })
 
+})
+
+onUnmounted(() => {
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 </script>
 
