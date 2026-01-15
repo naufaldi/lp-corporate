@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useNuxtApp } from '#app'
 
 interface Props {
@@ -17,9 +17,10 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { $gsap } = useNuxtApp()
+const dividerRef = ref<SVGSVGElement | null>(null)
 
 onMounted(() => {
-  const divider = document.querySelector('.section-divider')
+  const divider = dividerRef.value
   if (!divider) return
 
   $gsap.fromTo(divider,
@@ -65,6 +66,7 @@ const clipPath = computed(() => {
     :style="{ height: `${height}px` }"
   >
     <svg 
+      ref="dividerRef"
       class="section-divider" 
       :viewBox="`0 0 1440 ${height}`" 
       preserveAspectRatio="none"

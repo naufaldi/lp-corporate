@@ -113,21 +113,21 @@ onMounted(() => {
   })
 
   $animation?.batchReveal?.('.info-card', {
-    trigger: '.info-grid',
+    trigger: '#contact',
     duration: 0.5,
     stagger: 0.1,
     y: 30
   })
 
   $animation?.batchReveal?.('.office-card', {
-    trigger: '.offices-grid',
+    trigger: '#contact',
     duration: 0.5,
     stagger: 0.15,
     y: 20
   })
 
   $animation?.batchReveal?.('.form-group', {
-    trigger: '.contact-form',
+    trigger: '#contact',
     duration: 0.4,
     stagger: 0.08,
     y: 20

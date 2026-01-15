@@ -119,7 +119,7 @@ const geographicData = {
 </script>
 
 <template>
-  <section id="geographic" class="geo-section relative h-screen min-h-[800px] overflow-hidden bg-[#2c2416]">
+  <section id="geographic" class="geo-section panel relative h-screen min-h-[800px] overflow-hidden bg-[#2c2416]">
     <div class="absolute inset-0 z-0">
       <div class="map-container absolute inset-0">
         <div class="map-layer absolute">

@@ -10,46 +10,47 @@ import ProductSection from '~/components/sections/ProductSection.vue'
 import ContactSection from '~/components/sections/ContactSection.vue'
 import AppNavigation from '~/components/AppNavigation.vue'
 
-const { $gsap, $ScrollTrigger, $Observer, $animationUtils } = useNuxtApp()
+const { $gsap, $ScrollTrigger } = useNuxtApp()
 
-const snapSectionIds = ['#hero', '#stats', '#sustainability', '#mission', '#geographic', '#product']
-const contactId = '#contact'
+let panels: HTMLElement[] = []
+let scrollTween: gsap.core.Tween | null = null
+let normalizeObserver: { disable: () => void; enable: () => void; kill?: () => void } | null = null
+let snapTriggers: Array<{ kill: () => void }> = []
 
-let observer: { kill: () => void } | null = null
-let isAnimating = false
-
-const getSections = (): HTMLElement[] => {
-  return snapSectionIds
-    .map((id) => document.querySelector(id))
-    .filter(Boolean) as HTMLElement[]
+const onTouchStart = (e: TouchEvent) => {
+  if (!scrollTween) return
+  e.preventDefault()
+  e.stopImmediatePropagation()
 }
 
-const getContactTop = (): number => {
-  const contact = document.querySelector(contactId) as HTMLElement | null
-  return contact ? contact.offsetTop : Number.POSITIVE_INFINITY
-}
+const goToSection = (index: number) => {
+  const panel = panels[index]
+  if (!panel) return
 
-const getCurrentIndex = (sections: HTMLElement[]): number => {
-  const scrollY = window.scrollY
-  let currentIndex = 0
-  sections.forEach((section, index) => {
-    if (scrollY >= section.offsetTop - window.innerHeight / 2) {
-      currentIndex = index
+  scrollTween = $gsap.to(window, {
+    scrollTo: { y: panel, autoKill: false },
+    duration: 1,
+    overwrite: true,
+    onStart: () => {
+      if (!normalizeObserver) return
+      normalizeObserver.disable()
+      normalizeObserver.enable()
+    },
+    onComplete: () => {
+      scrollTween = null
+      $ScrollTrigger.refresh()
     }
   })
-  return currentIndex
 }
 
 const scrollToSection = (target: string) => {
   const el = document.querySelector(target) as HTMLElement | null
   if (!el) return
-  if ($animationUtils?.shouldReduceMotion?.()) {
-    el.scrollIntoView({ behavior: 'auto' })
-    return
-  }
-
   $gsap.to(window, {
-    scrollTo: { y: el, autoKill: false },
+    scrollTo: {
+      y: el,
+      autoKill: false
+    },
     duration: 0.8,
     ease: 'power2.out'
   })
@@ -57,78 +58,48 @@ const scrollToSection = (target: string) => {
 
 provide('scrollToSection', scrollToSection)
 
-const enableSnap = () => {
-  if (observer || !$Observer) return
-  const sections = getSections()
-  observer = $Observer.create({
-    type: 'wheel,touch,pointer',
-    tolerance: 12,
-    preventDefault: true,
-    onDown: () => {
-      if (isAnimating) return
-      const index = getCurrentIndex(sections)
-      const nextIndex = Math.min(index + 1, sections.length - 1)
-      if (nextIndex === index) return
-      isAnimating = true
-      $gsap.to(window, {
-        scrollTo: { y: sections[nextIndex], autoKill: false },
-        duration: 0.85,
-        ease: 'power2.out',
-        onComplete: () => {
-          isAnimating = false
-        }
-      })
-    },
-    onUp: () => {
-      if (isAnimating) return
-      const index = getCurrentIndex(sections)
-      const prevIndex = Math.max(index - 1, 0)
-      if (prevIndex === index) return
-      isAnimating = true
-      $gsap.to(window, {
-        scrollTo: { y: sections[prevIndex], autoKill: false },
-        duration: 0.85,
-        ease: 'power2.out',
-        onComplete: () => {
-          isAnimating = false
-        }
-      })
-    }
-  })
-}
-
-const disableSnap = () => {
-  if (!observer) return
-  observer.kill()
-  observer = null
-}
-
-const updateSnapState = () => {
-  const contactTop = getContactTop()
-  const shouldSnap = window.scrollY < contactTop - 2
-  if (shouldSnap) {
-    enableSnap()
-  } else {
-    disableSnap()
-  }
-}
-
-const onResize = () => {
-  $ScrollTrigger?.refresh()
-  updateSnapState()
-}
-
 onMounted(() => {
-  if ($animationUtils?.shouldReduceMotion?.()) return
-  updateSnapState()
-  window.addEventListener('scroll', updateSnapState, { passive: true })
-  window.addEventListener('resize', onResize)
+  panels = $gsap.utils.toArray('.panel') as HTMLElement[]
+  if (!panels.length) return
+
+  if ($ScrollTrigger.isTouch === 1) {
+    normalizeObserver = $ScrollTrigger.normalizeScroll(true) as typeof normalizeObserver
+  }
+
+  document.addEventListener('touchstart', onTouchStart, { capture: true, passive: false })
+
+  panels.forEach((panel, i) => {
+    const trigger = $ScrollTrigger.create({
+      trigger: panel,
+      start: 'top bottom',
+      end: '+=199%',
+      onToggle: (self) => {
+        if (self.isActive && !scrollTween) goToSection(i)
+      }
+    })
+    snapTriggers.push(trigger)
+  })
+
+  const snap = $ScrollTrigger.create({
+    start: 0,
+    end: () => {
+      const last = panels[panels.length - 1]
+      if (!last) return 'max'
+      return last.offsetTop + last.offsetHeight
+    },
+    snap: panels.length > 1 ? 1 / (panels.length - 1) : 1
+  })
+  snapTriggers.push(snap)
 })
 
 onUnmounted(() => {
-  disableSnap()
-  window.removeEventListener('scroll', updateSnapState)
-  window.removeEventListener('resize', onResize)
+  snapTriggers.forEach((t) => t.kill())
+  snapTriggers = []
+
+  normalizeObserver?.kill?.()
+  normalizeObserver = null
+
+  document.removeEventListener('touchstart', onTouchStart, true)
 })
 </script>
 

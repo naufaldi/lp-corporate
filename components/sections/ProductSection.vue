@@ -118,14 +118,14 @@ onMounted(() => {
   })
 
   $animation?.batchReveal?.('.spec-card', {
-    trigger: '.specs-grid',
+    trigger: '#product',
     duration: 0.5,
     stagger: 0.08,
     y: 30
   })
 
   $animation?.batchReveal?.('.feature-card', {
-    trigger: '.features-grid',
+    trigger: '#product',
     duration: 0.5,
     stagger: 0.1,
     y: 30
@@ -145,7 +145,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <section id="product" class="product-section">
+  <section id="product" class="product-section panel">
     <div class="product-container">
       <div class="product-left">
         <div class="left-background">

@@ -21,7 +21,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     scrubFactor: 0.5,
     magneticStrength: 25,
     magneticDuration: 0.3,
-    triggerStart: 'top 70%',
+    triggerStart: 'top 60%',
     triggerEnd: 'bottom 20%'
   }
 
@@ -701,13 +701,31 @@ export default defineNuxtPlugin((nuxtApp) => {
         ease = config.smoothEase
       } = options
 
-      if (shouldReduce) {
-        return gsap.set(target, { opacity: 1, y: 0 })
+      const triggerElement = trigger ? utils.getElement(trigger) : undefined
+      let targetArray: Element[] = []
+
+      if (typeof target === 'string') {
+        if (triggerElement) {
+          const selector = gsap.utils.selector(triggerElement)
+          targetArray = selector(target)
+        } else {
+          targetArray = gsap.utils.toArray(target) as Element[]
+        }
+      } else if (Array.isArray(target)) {
+        targetArray = target
+      } else {
+        targetArray = [target]
       }
 
-      const triggerElement = trigger ? utils.getElement(trigger) : undefined
+      if (!targetArray.length) return
 
-      return ScrollTrigger.batch(target, {
+      if (shouldReduce) {
+        return gsap.set(targetArray, { opacity: 1, y: 0 })
+      }
+
+      gsap.set(targetArray, { autoAlpha: 0, y })
+
+      return ScrollTrigger.batch(targetArray, {
         start,
         trigger: triggerElement ?? undefined,
         once: true,
@@ -815,7 +833,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     provide: {
       gsap,
       ScrollTrigger,
-      ScrollToPlugin,
       Observer,
       $animation: animations,
       $animationConfig: config,

@@ -15,6 +15,19 @@ const activeNode = ref<number | null>(null)
 const expandedNodes = ref<number[]>([])
 const visibleNodes = ref<number[]>([])
 
+const cleanupFns: Array<() => void> = []
+
+const registerCleanup = (item: unknown) => {
+  if (!item) return
+  if (Array.isArray(item)) {
+    item.forEach(registerCleanup)
+    return
+  }
+  if (typeof (item as { kill?: () => void }).kill === 'function') {
+    cleanupFns.push(() => (item as { kill: () => void }).kill())
+  }
+}
+
 const milestones: Milestone[] = [
   {
     year: '2015',
@@ -124,10 +137,11 @@ onMounted(() => {
     defaults: { ease: 'power3.out' },
     scrollTrigger: {
       trigger: '#sustainability',
-      start: 'top 70%',
+      start: 'top 60%',
       once: true
     }
   })
+  registerCleanup(tl)
 
   tl.from('.sustainability-background', {
     opacity: 0,
@@ -139,45 +153,45 @@ onMounted(() => {
     ease: 'power2.out'
   }, '-=0.4')
 
-  $animation?.batchReveal?.('.journey-intro > *', {
+  registerCleanup($animation?.batchReveal?.('.journey-intro > *', {
     trigger: '#sustainability',
     stagger: 0.1,
     y: 24
-  })
+  }))
 
-  $gsap.from('.timeline-track', {
+  registerCleanup($gsap.from('.timeline-track', {
     scaleX: 0,
     duration: 0.8,
     ease: 'power2.inOut',
     scrollTrigger: {
       trigger: '#sustainability',
-      start: 'top 70%',
+      start: 'top 60%',
       once: true
     }
-  })
+  }))
 
-  $animation?.batchReveal?.('.milestone-node', {
+  registerCleanup($animation?.batchReveal?.('.milestone-node', {
     trigger: '#sustainability',
     stagger: 0.15,
     y: 24
-  })
+  }))
 
-  $gsap.from('.floating-particles', {
+  registerCleanup($gsap.from('.floating-particles', {
     opacity: 0,
     duration: 0.5
-  })
+  }))
 
-  $gsap.from('.corner-accent', {
+  registerCleanup($gsap.from('.corner-accent', {
     scale: 0,
     opacity: 0,
     duration: 0.4,
     stagger: 0.1,
     ease: 'back.out(2)'
-  })
+  }))
 
-  $animation?.bgParallax?.('.bg-image', { speed: 0.2, scrub: true })
+  registerCleanup($animation?.bgParallax?.('.bg-image', { speed: 0.2, scrub: true }))
 
-  $gsap.to('.bg-gradient-mesh', {
+  registerCleanup($gsap.to('.bg-gradient-mesh', {
     scrollTrigger: {
       trigger: '.sustainability-section',
       start: 'top bottom',
@@ -186,10 +200,10 @@ onMounted(() => {
     },
     xPercent: -10,
     ease: 'none'
-  })
+  }))
 
   milestones.forEach((_, index) => {
-    $ScrollTrigger.create({
+    const trigger = $ScrollTrigger.create({
       trigger: `.node-${index}`,
       start: 'top 80%',
       onEnter: () => visibleNodes.value.push(index),
@@ -198,9 +212,10 @@ onMounted(() => {
         if (idx > -1) visibleNodes.value.splice(idx, 1)
       }
     })
+    registerCleanup(trigger)
   })
 
-  $gsap.to('.floating-particles', {
+  registerCleanup($gsap.to('.floating-particles', {
     scrollTrigger: {
       trigger: '.sustainability-section',
       start: 'top bottom',
@@ -209,7 +224,7 @@ onMounted(() => {
     },
     y: -100,
     ease: 'none'
-  })
+  }))
 
   document.querySelectorAll('.milestone-node').forEach((node) => {
     const cleanup = $animation?.hoverScale?.(node as HTMLElement, { scale: 1.05, duration: 0.3 })
@@ -224,6 +239,7 @@ onMounted(() => {
       scrub: true
     }
   })
+  registerCleanup(progressTl)
   progressTl.to('.timeline-progress', {
     height: '100%',
     duration: 1
@@ -231,12 +247,12 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  $ScrollTrigger.getAll().forEach(t => t.kill())
+  cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
 })
 </script>
 
 <template>
-  <section id="sustainability" class="sustainability-section">
+  <section id="sustainability" class="sustainability-section panel">
     <div class="sustainability-background">
       <div class="bg-image-wrapper">
         <img

@@ -1,7 +1,6 @@
 import type { GSAP } from 'gsap'
 import type { ScrollTrigger } from 'gsap/ScrollTrigger'
 import type { Observer } from 'gsap/Observer'
-import type { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
 export interface AnimationOptions {
   delay?: number
@@ -82,7 +81,6 @@ declare module '#app' {
     $gsap: typeof import('gsap').gsap
     $ScrollTrigger: typeof ScrollTrigger
     $Observer: typeof Observer
-    $ScrollToPlugin: typeof ScrollToPlugin
     $animation: AnimationAPI
     $animationConfig: AnimationConfig
     $animationUtils: AnimationUtils
@@ -94,7 +92,6 @@ declare module 'vue' {
     $gsap: typeof import('gsap').gsap
     $ScrollTrigger: typeof ScrollTrigger
     $Observer: typeof Observer
-    $ScrollToPlugin: typeof ScrollToPlugin
     $animation: AnimationAPI
     $animationConfig: AnimationConfig
     $animationUtils: AnimationUtils

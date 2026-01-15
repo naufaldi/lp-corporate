@@ -43,13 +43,13 @@ onMounted(() => {
   })
 
   $animation?.batchReveal?.('.stat-row', {
-    trigger: '.stats-column',
+    trigger: '#stats',
     stagger: 0.12,
     y: 40
   })
 
   $animation?.batchReveal?.('.cert-row', {
-    trigger: '.cert-row',
+    trigger: '#stats',
     duration: 0.5,
     y: 20
   })
@@ -67,7 +67,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section id="stats" class="stats-section h-screen flex flex-col lg:flex-row overflow-hidden">
+  <section id="stats" class="stats-section panel h-screen flex flex-col lg:flex-row overflow-hidden">
     <div class="hero-statement w-full lg:w-1/2 bg-[#f5f0e8] flex flex-col justify-center px-8 lg:px-24 py-16 lg:py-0 relative">
       <div class="hero-content max-w-xl">
         <span class="section-label text-sm uppercase tracking-[0.3em] text-[#c45b28] mb-8 block">
@@ -99,7 +99,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div class="stats-column w-full lg:w-1/2 bg-[#2c2416] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0 overflow-y-auto">
+    <div class="stats-column w-full lg:w-1/2 bg-[#2c2416] flex flex-col justify-center px-8 lg:px-16 py-16 lg:py-0">
       <div
           class="stat-row flex items-center gap-6 lg:gap-10 mb-10 lg:mb-16 pb-10 lg:pb-16 border-b border-[#f5f0e8]/10"
           v-for="(stat, index) in stats"

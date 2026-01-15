@@ -22,6 +22,7 @@
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    height: auto;
   }
 
   body {
@@ -30,6 +31,13 @@
     font-family: var(--font-sans);
     margin: 0;
     padding: 0;
+    height: auto;
+  }
+
+  .panel {
+    height: 100vh;
+    top: 0;
+    will-change: transform;
   }
 
   h1, h2, h3, h4, h5, h6 {

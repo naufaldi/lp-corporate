@@ -78,7 +78,7 @@ const values = [
 </script>
 
 <template>
-  <section id="mission" class="relative h-screen min-h-[700px] overflow-hidden bg-[#0d0b08]">
+  <section id="mission" class="panel relative h-screen min-h-[700px] overflow-hidden bg-[#0d0b08]">
     <div class="absolute inset-0 z-0">
       <div class="bg-parallax absolute inset-0 bg-cover bg-center bg-no-repeat"></div>
       <div class="absolute inset-0 bg-gradient-to-r from-[#0d0b08]/98 via-[#0d0b08]/90 to-[#0d0b08]/85"></div>

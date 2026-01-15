@@ -113,7 +113,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section id="hero" class="hero-section">
+  <section id="hero" class="hero-section panel">
     <div class="hero-bg">
       <img
         src="/images/oil-palm.jpg"
