@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
 
 interface Milestone {
@@ -133,48 +133,57 @@ onMounted(() => {
     return
   }
 
-  const tl = $gsap.timeline({
-    defaults: { ease: 'power3.out' },
-    scrollTrigger: {
-      trigger: '#sustainability',
-      start: 'top 60%',
-      once: true
+  nextTick(() => {
+    const triggerEl = document.querySelector('#sustainability') as HTMLElement
+    const isAlreadyInView = triggerEl && triggerEl.getBoundingClientRect().top <= window.innerHeight * 0.6
+
+    const tl = $gsap.timeline({
+      defaults: { ease: 'power3.out' },
+      scrollTrigger: {
+        trigger: '#sustainability',
+        start: 'top 60%',
+        once: true
+      }
+    })
+    registerCleanup(tl)
+
+    if (isAlreadyInView) {
+      tl.progress(1)
     }
-  })
-  registerCleanup(tl)
 
-  tl.from('.sustainability-background', {
-    opacity: 0,
-    duration: 0.8
-  })
-  .from('.bg-image', {
-    scale: 1.2,
-    duration: 1.5,
-    ease: 'power2.out'
-  }, '-=0.4')
+    tl.from('.sustainability-background', {
+      opacity: 0,
+      duration: 0.8
+    })
+    .from('.bg-image', {
+      scale: 1.2,
+      duration: 1.5,
+      ease: 'power2.out'
+    }, '-=0.4')
 
-  registerCleanup($animation?.batchReveal?.('.journey-intro > *', {
-    trigger: '#sustainability',
-    stagger: 0.1,
-    y: 24
-  }))
-
-  registerCleanup($gsap.from('.timeline-track', {
-    scaleX: 0,
-    duration: 0.8,
-    ease: 'power2.inOut',
-    scrollTrigger: {
+    registerCleanup($animation?.batchReveal?.('.journey-intro > *', {
       trigger: '#sustainability',
-      start: 'top 60%',
-      once: true
-    }
-  }))
+      stagger: 0.1,
+      y: 24
+    }))
 
-  registerCleanup($animation?.batchReveal?.('.milestone-node', {
-    trigger: '#sustainability',
-    stagger: 0.15,
-    y: 24
-  }))
+    registerCleanup($gsap.from('.timeline-track', {
+      scaleX: 0,
+      duration: 0.8,
+      ease: 'power2.inOut',
+      scrollTrigger: {
+        trigger: '#sustainability',
+        start: 'top 60%',
+        once: true
+      }
+    }))
+
+    registerCleanup($animation?.batchReveal?.('.milestone-node', {
+      trigger: '#sustainability',
+      stagger: 0.15,
+      y: 24
+    }))
+  })
 
   registerCleanup($gsap.from('.floating-particles', {
     opacity: 0,

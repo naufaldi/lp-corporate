@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
 
 interface ContactInfo {
@@ -89,63 +89,78 @@ onMounted(() => {
   const shouldReduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   if (shouldReduceMotion) {
-    $gsap.set(['.contact-hero', '.hero-stat', '.contact-content', '.info-card', '.office-card', '.form-group'], { opacity: 1, y: 0 })
+    $gsap.set(['.contact-hero', '.hero-stat', '.contact-content', '.info-card', '.office-card', '.form-group', '.section-title', '.offices-section'], { opacity: 1, y: 0 })
     return
   }
 
-  $animation?.batchReveal?.('.contact-hero', {
-    trigger: '#contact',
-    duration: 1,
-    y: 40
-  })
+  nextTick(() => {
+    $animation?.batchReveal?.('.contact-hero', {
+      trigger: '#contact',
+      duration: 1,
+      y: 40
+    })
 
-  $animation?.batchReveal?.('.hero-stat', {
-    trigger: '#contact',
-    duration: 0.5,
-    stagger: 0.12,
-    y: 20
-  })
+    $animation?.batchReveal?.('.hero-stat', {
+      trigger: '#contact',
+      duration: 0.5,
+      stagger: 0.12,
+      y: 20
+    })
 
-  $animation?.batchReveal?.('.contact-content', {
-    trigger: '#contact',
-    duration: 0.8,
-    y: 60
-  })
+    $animation?.batchReveal?.('.contact-content', {
+      trigger: '#contact',
+      duration: 0.8,
+      y: 60
+    })
 
-  $animation?.batchReveal?.('.info-card', {
-    trigger: '#contact',
-    duration: 0.5,
-    stagger: 0.1,
-    y: 30
-  })
+    $animation?.batchReveal?.('.section-title', {
+      trigger: '#contact',
+      duration: 0.6,
+      stagger: 0.1,
+      y: 20
+    })
 
-  $animation?.batchReveal?.('.office-card', {
-    trigger: '#contact',
-    duration: 0.5,
-    stagger: 0.15,
-    y: 20
-  })
+    $animation?.batchReveal?.('.info-card', {
+      trigger: '#contact',
+      duration: 0.5,
+      stagger: 0.1,
+      y: 30
+    })
 
-  $animation?.batchReveal?.('.form-group', {
-    trigger: '#contact',
-    duration: 0.4,
-    stagger: 0.08,
-    y: 20
-  })
+    $animation?.batchReveal?.('.offices-section', {
+      trigger: '#contact',
+      duration: 0.6,
+      y: 30
+    })
 
-  document.querySelectorAll('.info-card').forEach((card) => {
-    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
-    if (cleanup) cleanupFns.push(cleanup)
-  })
+    $animation?.batchReveal?.('.office-card', {
+      trigger: '#contact',
+      duration: 0.5,
+      stagger: 0.15,
+      y: 20
+    })
 
-  document.querySelectorAll('.office-card').forEach((card) => {
-    const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
-    if (cleanup) cleanupFns.push(cleanup)
-  })
+    $animation?.batchReveal?.('.form-group', {
+      trigger: '#contact',
+      duration: 0.4,
+      stagger: 0.08,
+      y: 20
+    })
 
-  document.querySelectorAll('.form-input, .form-textarea').forEach((input) => {
-    const cleanup = $animation?.focusRing?.(input as HTMLElement, { scale: 1.01, duration: 0.2 })
-    if (cleanup) cleanupFns.push(cleanup)
+    document.querySelectorAll('.info-card').forEach((card) => {
+      const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
+      if (cleanup) cleanupFns.push(cleanup)
+    })
+
+    document.querySelectorAll('.office-card').forEach((card) => {
+      const cleanup = $animation?.hoverScale?.(card as HTMLElement, { scale: 1.02, duration: 0.3 })
+      if (cleanup) cleanupFns.push(cleanup)
+    })
+
+    document.querySelectorAll('.form-input, .form-textarea').forEach((input) => {
+      const cleanup = $animation?.focusRing?.(input as HTMLElement, { scale: 1.01, duration: 0.2 })
+      if (cleanup) cleanupFns.push(cleanup)
+    })
   })
 })
 
@@ -635,7 +650,8 @@ onUnmounted(() => {
   padding: 1.25rem;
   background: #2c2416;
   border-radius: 12px;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  will-change: transform, opacity;
 }
 
 .office-card:hover {

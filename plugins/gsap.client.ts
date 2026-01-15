@@ -708,6 +708,9 @@ export default defineNuxtPlugin((nuxtApp) => {
         if (triggerElement) {
           const selector = gsap.utils.selector(triggerElement)
           targetArray = selector(target)
+          if (!targetArray.length) {
+            targetArray = gsap.utils.toArray(target) as Element[]
+          }
         } else {
           targetArray = gsap.utils.toArray(target) as Element[]
         }
@@ -723,20 +726,75 @@ export default defineNuxtPlugin((nuxtApp) => {
         return gsap.set(targetArray, { opacity: 1, y: 0 })
       }
 
-      gsap.set(targetArray, { autoAlpha: 0, y })
+      gsap.set(targetArray, { opacity: 0, y })
 
-      return ScrollTrigger.batch(targetArray, {
+      const animateBatch = (batch: Element[]) => {
+        if (!batch || batch.length === 0) return
+        gsap.fromTo(
+          batch,
+          { opacity: 0, y },
+          { opacity: 1, y: 0, duration, stagger, ease, overwrite: 'auto' }
+        )
+      }
+
+      const checkImmediateViewport = (): boolean => {
+        if (!targetArray.length) return false
+        
+        const viewportHeight = window.innerHeight
+        const triggerRatio = parseFloat(start.split(' ')[1]?.replace('%', '') || '60') / 100
+        const triggerPoint = viewportHeight * triggerRatio
+        
+        if (triggerElement) {
+          const triggerRect = triggerElement.getBoundingClientRect()
+          return triggerRect.top <= triggerPoint && triggerRect.bottom > 0
+        } else {
+          const firstElement = targetArray[0] as HTMLElement
+          if (firstElement) {
+            const rect = firstElement.getBoundingClientRect()
+            return rect.top <= triggerPoint && rect.bottom > 0
+          }
+        }
+        
+        return false
+      }
+
+      if (import.meta.client) {
+        const isInViewport = checkImmediateViewport()
+        if (isInViewport) {
+          animateBatch(targetArray)
+        }
+      }
+
+      const batchTrigger = ScrollTrigger.batch(targetArray, {
         start,
         trigger: triggerElement ?? undefined,
         once: true,
         onEnter: (batch) => {
-          gsap.fromTo(
-            batch,
-            { opacity: 0, y },
-            { opacity: 1, y: 0, duration, stagger, ease, overwrite: 'auto' }
-          )
+          animateBatch(batch)
+        },
+        onEnterBack: (batch) => {
+          animateBatch(batch)
         }
       })
+
+      if (import.meta.client && batchTrigger) {
+        requestAnimationFrame(() => {
+          ScrollTrigger.refresh()
+          
+          const isStillInViewport = checkImmediateViewport()
+          if (isStillInViewport) {
+            const hiddenElements = targetArray.filter((el) => {
+              const computedStyle = window.getComputedStyle(el as HTMLElement)
+              return parseFloat(computedStyle.opacity) < 0.1
+            })
+            if (hiddenElements.length > 0) {
+              animateBatch(hiddenElements)
+            }
+          }
+        })
+      }
+
+      return batchTrigger
     },
 
     bgParallax(

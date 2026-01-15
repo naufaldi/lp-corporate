@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { onMounted, onUnmounted, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
 import IconRspoSmall from '../ui/icons/IconRspoSmall.vue'
 import IconIsccSmall from '../ui/icons/IconIsccSmall.vue'
@@ -36,27 +36,29 @@ onMounted(() => {
     return
   }
 
-  $animation?.batchReveal?.('.hero-content', {
-    trigger: '#stats',
-    duration: 0.8,
-    y: 30
-  })
+  nextTick(() => {
+    $animation?.batchReveal?.('.hero-content', {
+      trigger: '#stats',
+      duration: 0.8,
+      y: 30
+    })
 
-  $animation?.batchReveal?.('.stat-row', {
-    trigger: '#stats',
-    stagger: 0.12,
-    y: 40
-  })
+    $animation?.batchReveal?.('.stat-row', {
+      trigger: '#stats',
+      stagger: 0.12,
+      y: 40
+    })
 
-  $animation?.batchReveal?.('.cert-row', {
-    trigger: '#stats',
-    duration: 0.5,
-    y: 20
-  })
+    $animation?.batchReveal?.('.cert-row', {
+      trigger: '#stats',
+      duration: 0.5,
+      y: 20
+    })
 
-  document.querySelectorAll('.stat-row').forEach((row) => {
-    const cleanup = $animation?.hoverScale?.(row as HTMLElement, { scale: 1.02, duration: 0.3 })
-    if (cleanup) cleanupFns.push(cleanup)
+    document.querySelectorAll('.stat-row').forEach((row) => {
+      const cleanup = $animation?.hoverScale?.(row as HTMLElement, { scale: 1.02, duration: 0.3 })
+      if (cleanup) cleanupFns.push(cleanup)
+    })
   })
 
 })

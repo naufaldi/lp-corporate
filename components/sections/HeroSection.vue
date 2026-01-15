@@ -5,6 +5,8 @@ import FlowParticles from '~/components/ui/FlowParticles.vue'
 
 const { $gsap, $animation } = useNuxtApp()
 
+let bgParallaxTween: gsap.core.Tween | null = null
+
 const scrollToStats = () => {
   const statsSection = document.querySelector('#stats')
   if (statsSection) {
@@ -13,14 +15,17 @@ const scrollToStats = () => {
 }
 
 const onImageLoad = () => {
-  $gsap.to('.hero-bg', {
+  bgParallaxTween?.scrollTrigger?.kill()
+  bgParallaxTween?.kill()
+
+  bgParallaxTween = $gsap.to('.hero-bg__image', {
     scrollTrigger: {
       trigger: '.hero-section',
       start: 'top top',
       end: 'bottom top',
       scrub: true
     },
-    yPercent: 20,
+    yPercent: 8,
     ease: 'none'
   })
 }
@@ -91,8 +96,6 @@ onMounted(() => {
   if (cleanupHover) cleanupFns.push(cleanupHover)
   if (cleanupMagnetic) cleanupFns.push(cleanupMagnetic)
 
-  $animation?.parallaxFlow?.('.hero-bg', { speed: 0.15, direction: 'left', scrub: true })
-
   $gsap.to('.floating-particle', {
     y: -40,
     rotation: 360,
@@ -109,6 +112,9 @@ onMounted(() => {
 
 onUnmounted(() => {
   cleanupFns.forEach(fn => fn && typeof fn === 'function' && fn())
+  bgParallaxTween?.scrollTrigger?.kill()
+  bgParallaxTween?.kill()
+  bgParallaxTween = null
 })
 </script>
 
@@ -221,10 +227,12 @@ onUnmounted(() => {
 }
 
 .hero-bg__image {
+  display: block;
   width: 100%;
-  height: 100%;
+  height: 120%;
   object-fit: cover;
   object-position: center 60%;
+  transform: translateY(-10%);
 }
 
 .hero-overlay {
