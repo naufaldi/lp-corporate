@@ -76,6 +76,12 @@
   *:focus:not(:focus-visible) {
     outline: none;
   }
+
+  /* Scroll margin for sections with fixed navigation */
+  section[id],
+  main[id] {
+    scroll-margin-top: 80px;
+  }
 }
 
 /* Page Transitions */

@@ -13,12 +13,46 @@ import AppNavigation from '~/components/AppNavigation.vue'
 const { $gsap, $ScrollTrigger } = useNuxtApp()
 
 const scrollToSection = (target: string) => {
-  const el = document.querySelector(target) as HTMLElement | null
-  if (!el) return
-  $gsap.to(window, {
-    duration: 0.8,
-    ease: 'power2.out',
-    scrollTo: { y: el, autoKill: true }
+  nextTick(() => {
+    const el = document.querySelector(target) as HTMLElement | null
+    if (!el) {
+      console.warn(`Element not found: ${target}`)
+      return
+    }
+    
+    const navHeight = 80
+    const rect = el.getBoundingClientRect()
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+    const targetPosition = rect.top + scrollTop - navHeight
+    
+    if (target === '#main-content') {
+      el.setAttribute('tabindex', '-1')
+      $gsap.to(window, {
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTo: {
+          y: targetPosition,
+          autoKill: true
+        },
+        onComplete: () => {
+          setTimeout(() => {
+            el.focus()
+            el.addEventListener('blur', () => {
+              el.removeAttribute('tabindex')
+            }, { once: true })
+          }, 100)
+        }
+      })
+    } else {
+      $gsap.to(window, {
+        duration: 0.8,
+        ease: 'power2.out',
+        scrollTo: {
+          y: targetPosition,
+          autoKill: true
+        }
+      })
+    }
   })
 }
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, ref, onMounted, onUnmounted } from 'vue'
+import { inject, ref, onMounted, onUnmounted, nextTick } from 'vue'
 import { useNuxtApp } from '#app'
 import SkipLink from '~/components/ui/SkipLink.vue'
 import { useFocusManagement } from '~/composables/useFocusManagement'
@@ -42,11 +42,13 @@ const checkMobile = () => {
 const toggleMobileMenu = () => {
   isMobileMenuOpen.value = !isMobileMenuOpen.value
   if (isMobileMenuOpen.value) {
+    document.body.style.overflow = 'hidden'
     const mobileMenu = document.querySelector('.app-nav__mobile') as HTMLElement
     if (mobileMenu) {
       focusTrapCleanup = trapFocus(mobileMenu)
     }
   } else {
+    document.body.style.overflow = ''
     if (focusTrapCleanup) {
       focusTrapCleanup()
       focusTrapCleanup = null
@@ -57,6 +59,7 @@ const toggleMobileMenu = () => {
 
 const closeMobileMenu = () => {
   isMobileMenuOpen.value = false
+  document.body.style.overflow = ''
   if (focusTrapCleanup) {
     focusTrapCleanup()
     focusTrapCleanup = null
@@ -64,16 +67,45 @@ const closeMobileMenu = () => {
   restoreFocus()
 }
 
-const scrollToSection = (href: string) => {
+const scrollToSection = (e: Event, href: string) => {
+  e.preventDefault()
   closeMobileMenu()
+  
   if (injectedScrollToSection) {
     injectedScrollToSection(href)
     return
   }
-  const element = document.querySelector(href)
-  if (element) {
-    element.scrollIntoView({ behavior: 'smooth' })
-  }
+  
+  nextTick(() => {
+    const element = document.querySelector(href) as HTMLElement | null
+    if (!element) {
+      console.warn(`Element not found: ${href}`)
+      return
+    }
+    
+    const navHeight = 80
+    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
+    const offsetPosition = elementPosition - navHeight
+    
+    if (href === '#main-content') {
+      element.setAttribute('tabindex', '-1')
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+      setTimeout(() => {
+        element.focus()
+        element.addEventListener('blur', () => {
+          element.removeAttribute('tabindex')
+        }, { once: true })
+      }, 100)
+    } else {
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      })
+    }
+  })
 }
 
 onMounted(() => {
@@ -114,6 +146,7 @@ onUnmounted(() => {
   if (focusTrapCleanup) {
     focusTrapCleanup()
   }
+  document.body.style.overflow = ''
 })
 </script>
 
@@ -132,7 +165,7 @@ onUnmounted(() => {
       <!-- Logo -->
       <button
         class="app-nav__logo"
-        @click="scrollToSection('#hero')"
+        @click="(e) => scrollToSection(e, '#hero')"
         aria-label="Go to homepage"
       >
         <NpiLogo variant="light" size="sm" />
@@ -146,14 +179,15 @@ onUnmounted(() => {
             :key="item.href"
             class="app-nav__item"
           >
-            <button
+            <a
+              :href="item.href"
               class="app-nav__link"
-              @click="scrollToSection(item.href)"
+              @click="scrollToSection($event, item.href)"
               :aria-label="`Navigate to ${item.label} section`"
             >
               <span class="app-nav__label">{{ item.label }}</span>
               <span class="app-nav__underline" aria-hidden="true"></span>
-            </button>
+            </a>
           </li>
         </ul>
       </div>
@@ -174,6 +208,14 @@ onUnmounted(() => {
       </button>
     </div>
 
+    <!-- Backdrop Overlay -->
+    <div
+      v-if="isMobileMenuOpen"
+      class="app-nav__backdrop"
+      @click="closeMobileMenu"
+      aria-hidden="true"
+    ></div>
+
     <!-- Mobile Menu -->
     <div
       id="mobile-menu"
@@ -188,14 +230,15 @@ onUnmounted(() => {
           :key="item.href"
           class="app-nav__mobile-item"
         >
-          <button
+          <a
+            :href="item.href"
             class="app-nav__mobile-link"
-            @click="scrollToSection(item.href)"
+            @click="scrollToSection($event, item.href)"
             role="menuitem"
             :aria-label="`Navigate to ${item.label} section`"
           >
             {{ item.label }}
-          </button>
+          </a>
         </li>
       </ul>
     </div>
@@ -282,6 +325,8 @@ onUnmounted(() => {
   padding: 0.5rem 0;
   position: relative;
   transition: color 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
 }
 
 .app-nav__link:focus-visible {
@@ -310,6 +355,19 @@ onUnmounted(() => {
   border: none;
   cursor: pointer;
   padding: 0.5rem;
+}
+
+@media (max-width: 767px) {
+  .app-nav__mobile-toggle {
+    background: rgba(44, 36, 22, 0.7);
+    border-radius: 8px;
+    padding: 0.75rem;
+    transition: background 0.3s ease;
+  }
+
+  .app-nav--scrolled .app-nav__mobile-toggle {
+    background: none;
+  }
 }
 
 .app-nav__mobile-toggle:focus-visible {
@@ -353,16 +411,42 @@ onUnmounted(() => {
   transform: rotate(-45deg) translate(5px, -5px);
 }
 
+/* Backdrop Overlay */
+.app-nav__backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(44, 36, 22, 0.9);
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 /* Mobile Menu */
 .app-nav__mobile {
   position: fixed;
-  top: 60px;
+  top: 0;
   left: 0;
   right: 0;
   bottom: 0;
   background: #2c2416;
-  padding: 2rem;
+  padding-top: 80px;
+  padding-left: 2rem;
+  padding-right: 2rem;
+  padding-bottom: 2rem;
+  z-index: 1000;
   animation: slideIn 0.3s ease;
+  overflow-y: auto;
 }
 
 @keyframes slideIn {
@@ -403,6 +487,7 @@ onUnmounted(() => {
   cursor: pointer;
   padding: 0.5rem 0;
   transition: color 0.3s ease;
+  text-decoration: none;
 }
 
 .app-nav__mobile-link:focus-visible {
